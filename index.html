@@ -1432,7 +1432,7 @@
     const baseName = cardImageName.replace(/\.(png|jpg|jpeg|gif|svg)$/i, '');
     console.log('🖼️ Cargando imagen:', { original: cardImageName, baseName });
     
-    // Mapeo de prefijos de archivo a directorios
+    // Mapeo de prefijos de archivo a directorios (nombres exactos)
     const directoryMap = {
       'PDS_': 'Pobreza y desigualdad social',
       'HFAA_': 'Hambre y falta de acceso a alimentos',
@@ -1460,6 +1460,7 @@
       }
     }
     
+    console.log('📁 Directorio determinado:', { baseName, subdirectory });
     tryLoadImageWithExtensionsInDirectory(baseName, subdirectory, CONFIG.outer.imageExtensions, callback, 'card-placeholder');
   }
 
@@ -1542,11 +1543,57 @@
     }
   }
 
+  // ===== DIAGNÓSTICO DE IMÁGENES =====
+  function testAllCardImages() {
+    const expectedImages = [
+      // Pobreza y desigualdad social (9 cartas)
+      'PDS_1.png', 'PDS_2.png', 'PDS_3.png', 'PDS_4.png', 'PDS_5.png', 'PDS_6.png', 'PDS_7.png', 'PDS_8.png', 'PDS_9.png',
+      // Hambre y falta de acceso a alimentos (8 cartas)
+      'HFAA_1.png', 'HFAA_2.png', 'HFAA_3.png', 'HFAA_4.png', 'HFAA_5.png', 'HFAA_6.png', 'HFAA_7.png', 'HFAA_8.png',
+      // Salud y bienestar insuficientes (9 cartas)
+      'SBI_1.png', 'SBI_2.png', 'SBI_3.png', 'SBI_4.png', 'SBI_5.png', 'SBI_6.png', 'SBI_7.png', 'SBI_8.png', 'SBI_9.png',
+      // Educacion desigual o limitada (8 cartas)
+      'EDL_1.png', 'EDL_2.png', 'EDL_3.png', 'EDL_4.png', 'EDL_5.png', 'EDL_6.png', 'EDL_7.png', 'EDL_8.png',
+      // Desigualdad de genero y discriminacion (8 cartas)
+      'DGD_1.png', 'DGD_2.png', 'DGD_3.png', 'DGD_4.png', 'DGD_5.png', 'DGD_6.png', 'DGD_7.png', 'DGD_8.png',
+      // Degradacion ambiental y cambio climatico (9 cartas)
+      'DACC_1.png', 'DACC_2.png', 'DACC_3.png', 'DACC_4.png', 'DACC_5.png', 'DACC_6.png', 'DACC_7.png', 'DACC_8.png', 'DACC_9.png',
+      // Consumo y produccion no sostenibles (9 cartas)
+      'CPNS_1.png', 'CPNS_2.png', 'CPNS_3.png', 'CPNS_4.png', 'CPNS_5.png', 'CPNS_6.png', 'CPNS_7.png', 'CPNS_8.png', 'CPNS_9.png',
+      // Falta de paz, justicia e instituciones solidas (8 cartas)
+      'FPJIS_1.png', 'FPJIS_2.png', 'FPJIS_3.png', 'FPJIS_4.png', 'FPJIS_5.png', 'FPJIS_6.png', 'FPJIS_7.png', 'FPJIS_8.png',
+      // Wildcards (8 cartas)
+      'wildcard_1.png', 'wildcard_2.png', 'wildcard_3.png', 'wildcard_4.png', 'wildcard_5.png', 'wildcard_6.png', 'wildcard_7.png', 'wildcard_8.png'
+    ];
+    
+    console.log('🧪 Iniciando diagnóstico de imágenes...');
+    let found = 0, missing = 0;
+    
+    expectedImages.forEach(imageName => {
+      loadCardImage(imageName, (imagePath) => {
+        if (imagePath.includes('placeholder')) {
+          console.log('❌ FALTA:', imageName, '→', imagePath);
+          missing++;
+        } else {
+          console.log('✅ OK:', imageName, '→', imagePath);
+          found++;
+        }
+        
+        if (found + missing === expectedImages.length) {
+          console.log(`🏁 Diagnóstico completo: ${found} encontradas, ${missing} faltantes`);
+        }
+      });
+    });
+  }
+
   // ===== EVENTOS DE SOCKET =====
 
   socket.on('connect', () => {
     state.mySocketId = socket.id;
     setTimeout(() => requestHandWithRetry(4, 300), 100);
+    
+    // Ejecutar diagnóstico de imágenes después de un tiempo
+    setTimeout(testAllCardImages, 2000);
   });
 
   let hasJoinedLobby = false;

@@ -101,7 +101,7 @@ class ResponsiveManager {
 
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = this.currentResolution.css;
+    link.href = '/' + this.currentResolution.css; // Ruta absoluta desde raíz
     link.id = `css-${this.currentResolution.key}`;
     
     // Añadir al head

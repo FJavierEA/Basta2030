@@ -6,7 +6,7 @@
   <title>Basta - Juego de Sustentabilidad</title>
   
   <!-- CSS Base (siempre cargado) -->
-  <link rel="stylesheet" href="anillo.css">
+  <link rel="stylesheet" href="/anillo.css">
   
   <!-- CSS Específicos por resolución (carga automática via JS) -->
   <!-- Se cargarán dinámicamente según la resolución detectada -->
@@ -14,21 +14,21 @@
 <body>
   <!-- Elementos de audio -->
   <audio id="bgMusic" loop>
-    <source src="audio/background.m4a" type="audio/mpeg">
+    <source src="/audio/background.m4a" type="audio/mpeg">
   </audio>
   <audio id="bellSound" preload="auto">
-    <source src="audio/bell.mp3" type="audio/mpeg">
-    <source src="audio/bell.ogg" type="audio/ogg">
-    <source src="audio/bell.wav" type="audio/wav">
+    <source src="/audio/bell.mp3" type="audio/mpeg">
+    <source src="/audio/bell.ogg" type="audio/ogg">
+    <source src="/audio/bell.wav" type="audio/wav">
   </audio>
   <audio id="cardMoveSound">
-    <source src="audio/card.mp3" type="audio/mpeg">
+    <source src="/audio/card.mp3" type="audio/mpeg">
   </audio>
   <audio id="chatNotifySound">
-    <source src="audio/notify.mp3" type="audio/mpeg">
+    <source src="/audio/notify.mp3" type="audio/mpeg">
   </audio>
   <audio id="panelSound">
-    <source src="audio/panel.mp3" type="audio/mpeg">
+    <source src="/audio/panel.mp3" type="audio/mpeg">
   </audio>
 
   <!-- Botón de música movido más abajo -->
@@ -442,7 +442,7 @@
     <!-- Mazo (izquierda arriba) -->
     <div class="deck-container">
       <h3>🃏 Mazo</h3>
-      <div class="card-deck" id="cardDeck" style="background-image: url('img/card-back.png');">
+      <div class="card-deck" id="cardDeck" style="background-image: url('/img/card-back.png');">
         <div class="deck-count" id="deckCount">72</div>
       </div>
       <button class="draw-button" id="drawCardBtn" disabled>Robar Carta</button>
@@ -517,7 +517,7 @@
     <!-- Descartadas (izquierda abajo) -->
     <div class="card-pile-container">
       <h3>🗑️ Descartadas</h3>
-      <div class="card-pile" id="discardPile" style="background-image: url('img/card-back.png');">
+      <div class="card-pile" id="discardPile" style="background-image: url('/img/card-back.png');">
         <div class="pile-count" id="discardCount">0</div>
       </div>
     </div>
@@ -548,11 +548,11 @@
   <button class="restart-button" id="restartButton">🔄 Jugar de Nuevo</button>
 
   <!-- Sistema de Detección Responsive -->
-  <script src="js/responsive-manager.js"></script>
+  <script src="/js/responsive-manager.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   
   <!-- AudioManager para sistema de música -->
-  <script src="audio-manager.js"></script>
+  <script src="/audio-manager.js"></script>
   
 <script>
 (function () {
@@ -1369,12 +1369,12 @@
     function tryNext() {
       if (index >= extensions.length) {
         // Si no se encontró ninguna extensión, usar placeholder
-        callback(`img/${placeholderName}.png`);
+        callback(`/img/${placeholderName}.png`);
         return;
       }
       
       const img = new Image();
-      const currentPath = `img/${baseName}${extensions[index]}`;
+      const currentPath = `/img/${baseName}${extensions[index]}`;
       
       img.onload = () => {
         // Imagen cargada exitosamente
@@ -1400,12 +1400,12 @@
     function tryNext() {
       if (index >= extensions.length) {
         // Si no se encontró ninguna extensión, usar placeholder
-        callback(`img/${placeholderName}.png`);
+        callback(`/img/${placeholderName}.png`);
         return;
       }
       
       const img = new Image();
-      const currentPath = `img/${subdirectory}${baseName}${extensions[index]}`;
+      const currentPath = `/img/${subdirectory}${baseName}${extensions[index]}`;
       
       img.onload = () => {
         // Imagen cargada exitosamente
@@ -1536,7 +1536,7 @@
     const countEl = pile.querySelector('.pile-count');
     if (countEl) countEl.textContent = String(state.discardCount);
     if (state.discardCount > 0) {
-      pile.style.backgroundImage = "url('img/card-back.png')";
+      pile.style.backgroundImage = "url('/img/card-back.png')";
     } else {
       pile.style.backgroundImage = 'none';
     }
@@ -2468,7 +2468,7 @@ socket.on('game:penaltyAnnouncement', ({ message, names, suffix, isPlural }) => 
     const countEl = pile.querySelector('.pile-count');
     if (countEl) countEl.textContent = String(state.discardCount);
     if (state.discardCount > 0) {
-      pile.style.backgroundImage = "url('img/card-back.png')";
+      pile.style.backgroundImage = "url('/img/card-back.png')";
     } else {
       pile.style.backgroundImage = 'none';
     }

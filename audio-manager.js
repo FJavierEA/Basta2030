@@ -32,26 +32,26 @@ class AudioManager {
     // Configuración local de música
     this.musicConfig = {
       lobby: {
-        track: 'audio/lobby.mp3', // Música de lobby en carpeta audio raíz
+        track: '/audio/lobby.mp3', // Música de lobby en carpeta audio raíz
         loop: true,
         volume: 0.3
       },
       game: {
         tracks: [
-          'audio/music/game1.mp3',
-          'audio/music/game2.mp3', 
-          'audio/music/game3.mp3',
-          'audio/music/game4.mp3',
-          'audio/music/game5.mp3',
-          'audio/music/game6.mp3',
-          'audio/music/game7.mp3',
-          'audio/music/game8.mp3',
-          'audio/music/game9.mp3',
-          'audio/music/game10.mp3',
-          'audio/music/game11.mp3',
-          'audio/music/game12.mp3',
-          'audio/music/game13.mp3',
-          'audio/music/game14.mp3'
+          '/audio/music/game1.mp3',
+          '/audio/music/game2.mp3', 
+          '/audio/music/game3.mp3',
+          '/audio/music/game4.mp3',
+          '/audio/music/game5.mp3',
+          '/audio/music/game6.mp3',
+          '/audio/music/game7.mp3',
+          '/audio/music/game8.mp3',
+          '/audio/music/game9.mp3',
+          '/audio/music/game10.mp3',
+          '/audio/music/game11.mp3',
+          '/audio/music/game12.mp3',
+          '/audio/music/game13.mp3',
+          '/audio/music/game14.mp3'
         ],
         loop: false, // Cada canción se reproduce solo una vez
         volume: 0.25,

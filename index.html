@@ -1,0 +1,2958 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basta - Juego de Sustentabilidad</title>
+  
+  <!-- CSS Base (siempre cargado) -->
+  <link rel="stylesheet" href="anillo.css">
+  
+  <!-- CSS Específicos por resolución (carga automática via JS) -->
+  <!-- Se cargarán dinámicamente según la resolución detectada -->
+</head>
+<body>
+  <!-- Elementos de audio -->
+  <audio id="bgMusic" loop>
+    <source src="audio/background.m4a" type="audio/mpeg">
+  </audio>
+  <audio id="bellSound" preload="auto">
+    <source src="audio/bell.mp3" type="audio/mpeg">
+    <source src="audio/bell.ogg" type="audio/ogg">
+    <source src="audio/bell.wav" type="audio/wav">
+  </audio>
+  <audio id="cardMoveSound">
+    <source src="audio/card.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="chatNotifySound">
+    <source src="audio/notify.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="panelSound">
+    <source src="audio/panel.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Botón de música movido más abajo -->
+
+  <!-- Lobby -->
+  <div class="lobby-overlay" id="lobbyOverlay">
+    <div class="lobby-card">
+      <h1>🌱 BASTA</h1>
+      <p>Juego de Desarrollo Sustentable</p>
+      
+      <div class="lobby-register" id="lobbyRegister">
+        <input type="text" id="playerNameInput" placeholder="Tu nombre" maxlength="18">
+        <button id="readyBtn">Entrar</button>
+      </div>
+
+      <!-- Mensaje de pantalla completa -->
+      <div class="fullscreen-tip" id="fullscreenTip">
+        <div class="tip-icon">⛶</div>
+        <div class="tip-text">
+          Para una mejor experiencia prueba jugar en pantalla completa 
+          <span class="tip-shortcut">(F11)</span>
+        </div>
+      </div>
+
+      <div class="lobby-players" id="lobbyPlayers" style="display: none;">
+        <h3>Jugadores en Sala</h3>
+        <ul id="playersList"></ul>
+        <button class="change-name-btn" id="changeNameBtn" style="display: none;">Cambiar nombre</button>
+      </div>
+
+      <p class="lobby-msg" id="lobbyMsg">Esperando jugadores...</p>
+      
+      <!-- Botones de chat del lobby -->
+      <div class="lobby-chat-buttons" id="lobbyChatButtons" style="display: none;">
+        <button class="chat-btn" id="lobbyChatToggle" title="Chat de texto">💬 Chat</button>
+        <button class="chat-btn" id="lobbyVoiceChatToggle" title="Chat de voz">🎙️ Voz</button>
+        <button class="music-toggle muted" id="lobbyMusicToggle" title="Música de fondo">🎵</button>
+        <button class="chat-btn" id="lobbySettingsToggle" title="Configuración de audio">⚙️ Audio</button>
+      </div>
+      
+      <button class="cancel-btn" id="cancelBtn" style="display: none;">Cancelar</button>
+      
+      <!-- Botón de abandonar partida (aparece después de registrarse) -->
+      <button class="leave-game-btn" id="leaveGameLobbyBtn" style="display: none;">🚪 Abandonar Partida</button>
+      
+      <div class="countdown-display" id="countdownDisplay">3</div>
+    </div>
+
+    <!-- Modal de confirmación para salir -->
+    <div class="exit-modal" id="exitModal" style="display: none;">
+      <div class="exit-modal-content">
+        <h3>¿Seguro que quieres abandonar?</h3>
+        <div class="exit-modal-buttons">
+          <button class="exit-confirm-btn" id="exitConfirmBtn">Salir</button>
+          <button class="exit-cancel-btn" id="exitCancelBtn">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel lateral: Reglas -->
+  <div class="side-panel-left" id="rulesPanel">
+    <div class="panel-header">
+      <h2>📖 Reglas del Juego</h2>
+      <button class="close-panel" id="closeRules">✖</button>
+    </div>
+    <div class="panel-content">
+      <ol>
+          <span class="highlight-title">🎯 Objetivo:</span>
+          <span class="highlight-objective">Ser el primer jugador en quedarse sin cartas</span>
+        <li>
+          El dado tiene <span class="highlight-number">dos tipos de caras</span>, si al lanzarlo sale <span class="highlight-number">1-17</span> deberás jugar con el círculo pequeño de números, sí te sale una <span class="highlight-number">imagen</span> tu descarte se realizará por los temas marcados en el círculo exterior del tablero
+        </li>
+
+          <span class="highlight-image">¡A JUGAR!</span>
+
+        <li>
+          Lanza el dado para saber si vas a descatar por <span class="highlight-number">números</span> o por <span class="highlight-image">imágenes (temas)</span>
+        </li>
+        <li>
+          Si descartas por <span class="highlight-number">imagen (tema)</span> el jugador en turno deberá girar la ruleta tomando en cuenta el <span class="highlight-image">círculo exterior</span> del tablero. Todos los jugadores descartan los más rápido posble con las tarjetas en ese tema, el primero en terminar toca la campana, terminando el turno.
+        </li>
+        <li>
+          Si descartas por <span class="highlight-number">objetivo</span> el jugador en turno deberá girar la ruleta tomando en cuenta el <span class="highlight-image">círculo interior</span> del tablero. Todos los jugadores descartan los más rápido posble con las tarjetas que contengan esas soluciones, el primero en terminar toca la campana, terminando el turno.
+        </li>
+        <li>
+          Si no tienes la carta correcta, puedes:
+          <ul>
+            <li><span class="highlight-action">Robar una carta</span> del mazo (solo una vez por turno)</li>
+            <li><span class="highlight-action">Pasar tu turno</span> (solo una vez por ronda)</li>
+          </ul>
+        </li>
+        <li>
+          Al sonar la <span class="highlight-number">campana</span> el turno se da por finalizado, y las cartas jugadas se validan, si los jugadores bajan cartas que no corresponde estos recibirán una <span class="highlight-image">penalización</span>, regresando las cartas que no pertenecen a su mano y agregando cartas del mazo a su mano.
+        </li>
+        <li>
+          Cuando juegues tu última carta, presiona la <span class="highlight-important">campana 🔔</span> y grita <span class="highlight-win">"¡BASTA!"</span>
+        </li>
+        <li>
+          <span class="highlight-warning">¡Importante!</span> Para tocar la campana debes haber bajado al menos una carta, si no cuentas con alguna aún robando carta del mazo puedes <span class="highlight-action">saltar turno</span> y esperar que termine la ronda.
+        </li>
+      </ol>
+      
+      <div class="info-note">
+        <strong>💡 Consejos:</strong>
+        <ul>
+          Familiarízate con las 8 categorías de problemáticas y las 17 categorías de soluciones en el panel de "Información Elemental" para jugar más rápido.
+        </ul>
+        <ul>
+          Para descartar por problemática (imagen), puedes fijarte en el color de la tarjeta.
+        </ul>
+        <ul>Las tarjetas doradas son comodines, te pueden salvar de un apuro (se pueden usar para cualquier categoría) así que úsalas sabiamente</ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel lateral: Información Elemental -->
+  <div class="side-panel-left" id="elementalPanel">
+    <div class="panel-header">
+      <h2>🌍 Información Elemental</h2>
+      <button class="close-panel" id="closeElemental">✖</button>
+    </div>
+    <div class="panel-content">
+      <h3 class="info-section-title">🌱 Objetivos de Desarrollo Sostenible</h3>
+          <div class="info-category">
+            <h4 class="category-title" style="color: #CC5555;">🏚️ Fin de la pobreza</h4>
+            <p>Poner fin a la pobreza en todas sus formas en todo el mundo</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #DDA63A;">� Hambre cero</h4>
+            <p>Poner fin al hambre y garantizar la seguridad alimentaria y la mejora de la nutrición</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #4C9F38;">⚕️ Salud y bienestar</h4>
+            <p>Garantizar una vida sana y promover el bienestar para todos en todas las edades</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #C5192D;">📚 Educación de calidad</h4>
+            <p>Garantizar una educación inclusiva, equitativa y de calidad</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #FF3A21;">♀️ Igualdad de género</h4>
+            <p>Lograr la igualdad de género y empoderar a todas las mujeres y niñas</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #26BDE2;">💧 Agua limpia y saneamiento</h4>
+            <p>Garantizar la disponibilidad y gestión sostenible del agua</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #FCC30B;">⚡ Energía asequible y no contaminante</h4>
+            <p>Garantizar el acceso a servicios energéticos sostenibles</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #A21942;">💼 Trabajo decente y crecimiento económico</h4>
+            <p>Promover el crecimiento económico sostenible y el empleo</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #FD6925;">�️ Industria, innovación e infraestructura</h4>
+            <p>Construir infraestructuras resilientes y fomentar la innovación</p>
+          </div>
+          <div class="info-category">
+            <h4 class="category-title" style="color: #DD1367;">🍽️ Reducción de las desigualdades</h4>
+            <p>Reducir las desigualdades en y entre los países.</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #FD9D24;">🏘️ Ciudades y comunidades sostenibles</h4>
+            <p>Lograr que las ciudades y los asentamientos humanos sean inclusivos, seguros, resilientes y sostenibles.</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #BF8B2E;">♻️ Producción y consumos responsables</h4>
+            <p>Garantizar modalidades de consumo y producción sostenibles.</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #3F7E44;">🌡️ Acción por el clima</h4>
+            <p>Adoptar medidas urgentes para combatir el cambio climático y sus efectos.</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #0A97D9;">🐟 Vida submarina</h4>
+            <p>Conservar y utilizar de manera sostenible los océanos, los mares y los recursos marinos para el desarrollo sostenible.</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #56C02B;">🌳 Vida de ecosistemas terrestres</h4>
+            <p>Proteger, restablecer y promover el uso sostenible de los ecosistemas terrestres, gestionar de manera sostenible los bosques, combatir la desertificación, detener e invertir la degradación de las tierras y detener la pérdida de biodiversidad.</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #00689D;">⚖️ Paz, justicia e instituciones sólidas</h4>
+            <p>Promover sociedades pacíficas e inclusivas para el desarrollo sostenible, facilitar el acceso a la justicia para todos y construir a todos los niveles instituciones eficaces e inclusivas que rindan cuentas.</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #19486A;">🤝 Alianzas para lograr los objetivos</h4>
+            <p>Fortalecer los medios de implementación y revitalizar la Alianza Mundial para el Desarrollo Sostenible.</p>
+          </div>
+        </div>
+          <h4 style="color: #ef4444; text-align: center; margin-bottom: 15px;">⚠️ Problemáticas Actuales</h4>
+          
+          <div class="info-category">
+            <h4 class="category-title" style="color: #DD1367;">💸 Pobreza y desigualdad social</h4>
+            <p>Millones de personas viven con ingresos insuficientes, sin acceso a vivienda, salud o educación. Las brechas entre ricos y pobres aumentan, afectando las oportunidades y la calidad de vida.</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #FD9D24;">🍞 Hambre y falta de acceso a alimentos</h4>
+            <p>Muchas comunidades carecen de alimentos nutritivos y seguros. La mala distribución, el cambio climático y los conflictos reducen la producción y el acceso a la comida.</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #BF8B2E;">🩺 Salud y bienestar insuficientes</h4>
+            <p>Persisten enfermedades prevenibles, falta de servicios médicos y atención mental deficiente. En algunos lugares, el acceso a vacunas, medicamentos o agua potable es limitado.</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #3F7E44;">📖 Educación desigual o limitada</h4>
+            <p>Millones de niños y jóvenes no pueden estudiar o reciben una educación de baja calidad. La falta de recursos, maestros y tecnología agrava las diferencias educativas.</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #0A97D9;">👩 Desigualdad de género y discriminación</h4>
+            <p>Las mujeres y niñas aún enfrentan desigualdad en el trabajo, la política y la educación. La violencia de género y la discriminación limitan su participación y desarrollo.</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #56C02B;">🌡️ Degradación ambiental y cambio climático</h4>
+            <p>La contaminación, la deforestación y el aumento de las emisiones dañan los ecosistemas. El cambio climático provoca sequías, inundaciones y pérdida de biodiversidad.</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #00689D;">🏭 Consumo y producción no sostenibles</h4>
+            <p>El uso excesivo de recursos naturales y la generación de desechos afectan al planeta. Se necesita producir y consumir de forma responsable para evitar el agotamiento ambiental.</p>
+          </div>
+
+          <div class="info-category">
+            <h4 class="category-title" style="color: #19486A;">⚔️ Falta de paz, justicia e instituciones sólidas</h4>
+            <p>En muchos lugares hay violencia, corrupción e impunidad. La falta de justicia y de gobiernos transparentes impide el desarrollo y la protección de los derechos humanos.</p>
+          </div>
+
+          <div class="info-reminder-section">
+            <h4 class="reminder-title">🎯 Recordatorios de juego</h4>
+            <div class="reminder-grid">
+              <div class="reminder-item">
+                <span class="reminder-icon">🎴</span>
+                <span class="reminder-text">Usa cartas estratégicamente</span>
+              </div>
+              <div class="reminder-item">
+                <span class="reminder-icon">🤔</span>
+                <span class="reminder-text">Piensa antes de jugar</span>
+              </div>
+              <div class="reminder-item">
+                <span class="reminder-icon">🌱</span>
+                <span class="reminder-text">Conecta con los ODS</span>
+              </div>
+              <div class="reminder-item">
+                <span class="reminder-icon">⏰</span>
+                <span class="reminder-text">Administra tu tiempo</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-note">
+            <strong>🌍 Recuerda:</strong> La <span class="highlight-sustainable">Agenda 2030</span> busca que todas las personas del mundo tengan las mismas oportunidades de desarrollo y bienestar, sin importar su origen, género, edad o condición económica.
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel lateral: Configuración -->
+  <div class="side-panel-left" id="settingsPanel">
+    <div class="panel-header">
+      <h2>⚙️ Configuración</h2>
+      <button class="close-panel" id="closeSettings">✖</button>
+    </div>
+    <div class="panel-content">
+      <div class="settings-group">
+        <div class="settings-control">
+          <label>
+            🔊 Volumen General: <span class="val" id="masterVolVal">100%</span>
+          </label>
+          <input type="range" id="masterVol" min="0" max="100" value="100">
+        </div>
+
+        <div class="settings-control">
+          <label>
+            🎵 Volumen Música: <span class="val" id="musicVolVal">70%</span>
+          </label>
+          <input type="range" id="musicVol" min="0" max="100" value="70">
+        </div>
+
+        <div class="settings-control">
+          <label>
+            🔔 Volumen Efectos: <span class="val" id="fxVolVal">80%</span>
+          </label>
+          <input type="range" id="fxVol" min="0" max="100" value="80">
+        </div>
+
+        <div class="settings-control">
+          <label>
+            🎙️ Volumen Voz: <span class="val" id="voiceVolVal">100%</span>
+          </label>
+          <input type="range" id="voiceVol" min="0" max="100" value="100">
+        </div>
+      </div>
+
+      <div class="settings-group" style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
+        <button class="leave-game-btn" id="leaveGameBtn" style="display: none;">
+          🚪 Abandonar Partida
+        </button>
+      </div>
+
+      <div class="info-note" style="margin-top: 20px;">
+        <strong>💡 Consejo:</strong> Ajusta los volúmenes según tu preferencia. Los cambios se aplican instantáneamente.
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel lateral: Chat -->
+  <div class="side-panel-left" id="chatPanel">
+    <div class="panel-header">
+      <h2>💬 Chat de Texto</h2>
+      <button class="close-panel" id="closeChat">✖</button>
+    </div>
+    <div class="panel-content chat-body">
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-container">
+        <input type="text" id="chatInput" placeholder="Escribe un mensaje..." maxlength="200">
+        <button id="chatSendBtn">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel lateral: Chat de Voz -->
+  <div class="side-panel-left" id="voiceChatPanel">
+    <div class="panel-header">
+      <h2>🎤 Chat de Voz</h2>
+      <button class="close-panel" id="closeVoiceChat">✖</button>
+    </div>
+    <div class="panel-content">
+      <div class="voice-device-selector">
+        <label>
+          🎤 Micrófono:
+          <select class="device-select" id="microphoneSelect">
+            <option value="">Cargando dispositivos...</option>
+          </select>
+        </label>
+        <label>
+          🔊 Altavoz:
+          <select class="device-select" id="speakerSelect">
+            <option value="">Predeterminado</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- Botón Conectarse -->
+      <div class="voice-connect-container" id="voiceConnectContainer">
+        <button class="voice-connect-btn" id="connectVoiceBtn">
+          🔌 Conectarse al Chat de Voz
+        </button>
+      </div>
+
+      <div class="voice-controls" id="voiceControls" style="display: none;">
+        <button class="voice-btn mic-off" id="toggleMic">
+          🎤 <span id="micStatus">OFF</span>
+        </button>
+        <button class="voice-btn speaker-on" id="toggleSpeaker">
+          🔊 <span id="speakerStatus">ON</span>
+        </button>
+        <button class="voice-btn disconnect-btn" id="disconnectVoiceBtn">
+          🔌 Desconectarse
+        </button>
+      </div>
+
+      <div class="voice-info">
+        <p><strong>Estado:</strong> <span id="voiceStatus">Desconectado</span></p>
+        <p><strong>Participantes:</strong> <span id="voiceParticipants">0</span></p>
+        <div id="tunnelWarning" class="tunnel-warning" style="display: none;">
+          ⚠️ <strong>Acceso a través de túnel detectado:</strong> El chat de voz puede tener conexión limitada. Para mejor experiencia, usa la URL de red local: <span id="localUrl"></span>
+        </div>
+      </div>
+
+      <div class="voice-users" id="voiceUsersList"></div>
+      
+      <!-- Recomendación Discord -->
+      <div class="discord-recommendation">
+        <p>Para una mejor experiencia te recomendamos usar Discord 
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="vertical-align: middle; margin-left: 5px;">
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.197.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.031zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z" fill="#5865F2"/>
+          </svg>
+        </p>
+        <button class="discord-join-btn" id="joinDiscordBtn">
+          🎮 Unirse al Discord
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Área de juego -->
+  <div class="game-area">
+    <!-- Mazo (izquierda arriba) -->
+    <div class="deck-container">
+      <h3>🃏 Mazo</h3>
+      <div class="card-deck" id="cardDeck" style="background-image: url('img/card-back.png');">
+        <div class="deck-count" id="deckCount">72</div>
+      </div>
+      <button class="draw-button" id="drawCardBtn" disabled>Robar Carta</button>
+    </div>
+
+    <!-- Área central: ruleta + controles -->
+    <div class="main-game">
+      <div class="container">
+        <!-- Anillo exterior (8 secciones de categorías) -->
+        <div class="outer-ring inactive">
+          <div class="outer-highlight"></div>
+          <div class="outer-labels"></div>
+        </div>
+
+        <!-- Sección blanca central -->
+        <div class="sections-wheel"></div>
+
+        <!-- Anillo interior (17 números) -->
+        <div class="ring-wheel inactive">
+          <div class="ring-highlight"></div>
+          <div class="ring-labels"></div>
+        </div>
+
+        <!-- Flecha giratoria -->
+        <div class="wheel locked" id="wheel">
+          <div id="conf"></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="rollDiceBtn" disabled>🎲 Tirar Dado</button>
+        <img id="diceImg" src="" alt="Dado">
+        <button id="skipTurnBtn" disabled>⏭️ Pasar Turno</button>
+        <button class="bell-button" id="bellButton" disabled>🔔 ¡BASTA!</button>
+      </div>
+      
+      <!-- Mensaje fijo de turno (solo cambia con cada turno) -->
+      <p id="turnMessage"></p>
+      
+      <!-- Mensaje de acciones dinámicas -->
+      <p id="message"></p>
+    </div>
+
+    <!-- Botón toggle para mostrar/ocultar panel -->
+        <button class="panel-toggle-btn" id="panelToggleBtn" title="Mostrar/Ocultar Panel">
+          <div class="hamburger-icon">
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </button>    <!-- Botones laterales (reglas, info, etc.) -->
+    <div class="info-panel-left" id="infoPanelLeft">
+      <div class="leeme-message" id="leemeMessage">← Leeme</div>
+      <button class="info-btn" id="rulesToggle" title="Reglas">📖</button>
+      <button class="info-btn" id="elementalToggle" title="Información elemental">ℹ️</button>
+      <button class="info-btn" id="settingsToggle" title="Configuración">⚙️</button>
+      <button class="info-btn" id="chatToggle" title="Chat de texto">💬</button>
+      <button class="info-btn" id="voiceChatToggle" title="Chat de voz">🎙️</button>
+      <!-- Botón de música integrado en el panel -->
+      <button class="music-toggle muted" id="musicToggle" title="Música de fondo">🎵</button>
+    </div>
+
+    <!-- Botón de configuración en esquina superior derecha -->
+    <button class="settings-corner-btn" id="settingsCornerBtn" title="Configuración">⚙️</button>
+
+    <!-- Cartas jugadas (derecha) -->
+    <div class="played-area">
+      <h3>🎴 Cartas Jugadas</h3>
+      <div class="played-cards-container" id="playedArea"></div>
+    </div>
+
+    <!-- Descartadas (izquierda abajo) -->
+    <div class="card-pile-container">
+      <h3>🗑️ Descartadas</h3>
+      <div class="card-pile" id="discardPile" style="background-image: url('img/card-back.png');">
+        <div class="pile-count" id="discardCount">0</div>
+      </div>
+    </div>
+
+    <!-- Mano del jugador (abajo) -->
+    <div class="player-hand locked" id="playerHand"></div>
+  </div>
+
+  <!-- Lista de jugadores flotante -->
+  <div class="players-list-panel" id="playersListPanel" style="display: none;">
+    <h3>👥 Jugadores</h3>
+    <div class="players-container" id="playersContainer"></div>
+  </div>
+
+  <!-- Dado personalizado 3D -->
+  <div class="custom-dice-container" id="customDiceContainer">
+    <div class="custom-dice" id="customDice">
+      <div class="dice-face face1"><span class="number-text">1-17</span></div>
+      <div class="dice-face face2"><span class="number-text">1-17</span></div>
+      <div class="dice-face face3"><span class="number-text">1-17</span></div>
+      <div class="dice-face face4"><span class="number-text">1-17</span></div>
+      <div class="dice-face face5 special">Derechos<br>Humanos</div>
+      <div class="dice-face face6"><span class="number-text">1-17</span></div>
+    </div>
+  </div>
+
+  <!-- Botón reiniciar -->
+  <button class="restart-button" id="restartButton">🔄 Jugar de Nuevo</button>
+
+  <!-- Sistema de Detección Responsive -->
+  <script src="js/responsive-manager.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  
+  <!-- AudioManager para sistema de música -->
+  <script src="audio-manager.js"></script>
+  
+<script>
+(function () {
+  const socket = io();
+
+  // Detectar si estamos accediendo a través de un túnel
+  function detectTunnel() {
+    const hostname = window.location.hostname;
+    const isTunnel = hostname.includes('.trycloudflare.com') || 
+                     hostname.includes('.loca.lt') || 
+                     hostname.includes('.ngrok.io') || 
+                     hostname.includes('.ngrok-free.app') ||
+                     hostname.includes('tunnel') ||
+                     hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.match(/^192\.168\.\d+\.\d+$/);
+    
+    if (isTunnel) {
+      const warning = document.getElementById('tunnelWarning');
+      const localUrl = document.getElementById('localUrl');
+      if (warning && localUrl) {
+        localUrl.textContent = 'http://192.168.1.13:3000';
+        warning.style.display = 'block';
+      }
+    }
+  }
+
+  // Ejecutar detección cuando se cargue la página
+  setTimeout(detectTunnel, 1000);
+  
+  // Mostrar panel elemental automáticamente al cargar la página (estado de lobby)
+  setTimeout(autoShowElementalPanel, 1200);
+
+  // Función para controlar la visibilidad automática del panel de información elemental
+  function autoShowElementalPanel() {
+    const isInLobby = !elements.lobbyOverlay.classList.contains('hidden');
+    if (isInLobby && !gameActive && elements.elementalPanel && elements.elementalToggle) {
+      // Verificar si hay algún panel de chat o voz abierto
+      const chatPanelOpen = elements.chatPanel?.classList.contains('show');
+      const voicePanelOpen = elements.voiceChatPanel?.classList.contains('show');
+      
+      // Solo mostrar panel elemental si no hay otros paneles importantes abiertos
+      if (!chatPanelOpen && !voicePanelOpen) {
+        // Mostrar automáticamente el panel elemental en lobby/registro/espera
+        elements.elementalPanel.classList.add('show');
+        elements.elementalToggle.classList.add('active');
+        
+        // Ocultar otros paneles que puedan estar abiertos (excepto chat/voz)
+        const otherPanels = [elements.rulesPanel, elements.settingsPanel];
+        const otherButtons = [elements.rulesToggle, elements.settingsToggle];
+        
+        otherPanels.forEach(panel => {
+          if (panel) panel.classList.remove('show');
+        });
+        otherButtons.forEach(btn => {
+          if (btn) btn.classList.remove('active');
+        });
+      }
+    }
+  }
+
+  // Variable para controlar si estamos en juego
+  let gameActive = false;
+
+  const elements = {
+    lobbyOverlay: document.getElementById('lobbyOverlay'),
+    playerNameInput: document.getElementById('playerNameInput'),
+    readyBtn: document.getElementById('readyBtn'),
+    cancelBtn: document.getElementById('cancelBtn'),
+    lobbyChatButtons: document.getElementById('lobbyChatButtons'),
+    lobbyChatToggle: document.getElementById('lobbyChatToggle'),
+    lobbyVoiceChatToggle: document.getElementById('lobbyVoiceChatToggle'),
+    lobbyMusicToggle: document.getElementById('lobbyMusicToggle'),
+    lobbySettingsToggle: document.getElementById('lobbySettingsToggle'),
+    leaveGameLobbyBtn: document.getElementById('leaveGameLobbyBtn'),
+    exitModal: document.getElementById('exitModal'),
+    exitConfirmBtn: document.getElementById('exitConfirmBtn'),
+    exitCancelBtn: document.getElementById('exitCancelBtn'),
+    changeNameBtn: document.getElementById('changeNameBtn'),
+    lobbyPlayers: document.getElementById('lobbyPlayers'),
+    playersList: document.getElementById('playersList'),
+    lobbyMsg: document.getElementById('lobbyMsg'),
+    countdownDisplay: document.getElementById('countdownDisplay'),
+    lobbyRegister: document.getElementById('lobbyRegister'),
+    fullscreenTip: document.getElementById('fullscreenTip'),
+
+    wheel: document.getElementById('wheel'),
+    ring: document.querySelector('.ring-wheel'),
+    outer: document.querySelector('.outer-ring'),
+    outerLabels: document.querySelector('.outer-labels'),
+    rollBtn: document.getElementById('rollDiceBtn'),
+    diceImg: document.getElementById('diceImg'),
+    customDiceContainer: document.getElementById('customDiceContainer'),
+    customDice: document.getElementById('customDice'),
+    turnMessage: document.getElementById('turnMessage'),
+    message: document.getElementById('message'),
+    bellButton: document.getElementById('bellButton'),
+    restartButton: document.getElementById('restartButton'),
+    playerHand: document.getElementById('playerHand'),
+    playedArea: document.getElementById('playedArea'),
+    skipTurnBtn: document.getElementById('skipTurnBtn'),
+    drawCardBtn: document.getElementById('drawCardBtn'),
+    cardDeck: document.getElementById('cardDeck'),
+    deckCount: document.getElementById('deckCount'),
+    discardPile: document.getElementById('discardPile'),
+    discardCount: document.getElementById('discardCount'),
+    turnIndicator: document.getElementById('turnIndicator'),
+    currentPlayerName: document.getElementById('currentPlayerName'),
+
+    infoPanelLeft: document.getElementById('infoPanelLeft'),
+    leemeMessage: document.getElementById('leemeMessage'),
+    
+    rulesPanel: document.getElementById('rulesPanel'),
+    rulesToggle: document.getElementById('rulesToggle'),
+    closeRules: document.getElementById('closeRules'),
+
+    elementalPanel: document.getElementById('elementalPanel'),
+    elementalToggle: document.getElementById('elementalToggle'),
+    closeElemental: document.getElementById('closeElemental'),
+
+    settingsPanel: document.getElementById('settingsPanel'),
+    settingsToggle: document.getElementById('settingsToggle'),
+    closeSettings: document.getElementById('closeSettings'),
+    masterVol: document.getElementById('masterVol'),
+    musicVol: document.getElementById('musicVol'),
+    fxVol: document.getElementById('fxVol'),
+    voiceVol: document.getElementById('voiceVol'),
+    masterVolVal: document.getElementById('masterVolVal'),
+    musicVolVal: document.getElementById('musicVolVal'),
+    fxVolVal: document.getElementById('fxVolVal'),
+    voiceVolVal: document.getElementById('voiceVolVal'),
+    leaveGameBtn: document.getElementById('leaveGameBtn'),
+
+    chatPanel: document.getElementById('chatPanel'),
+    chatToggle: document.getElementById('chatToggle'),
+    closeChat: document.getElementById('closeChat'),
+    chatMessages: document.getElementById('chatMessages'),
+    chatInput: document.getElementById('chatInput'),
+    chatSendBtn: document.getElementById('chatSendBtn'),
+
+    voiceChatPanel: document.getElementById('voiceChatPanel'),
+    voiceChatToggle: document.getElementById('voiceChatToggle'),
+    closeVoiceChat: document.getElementById('closeVoiceChat'),
+    connectVoiceBtn: document.getElementById('connectVoiceBtn'),
+    disconnectVoiceBtn: document.getElementById('disconnectVoiceBtn'),
+    voiceConnectContainer: document.getElementById('voiceConnectContainer'),
+    voiceControls: document.getElementById('voiceControls'),
+    toggleMic: document.getElementById('toggleMic'),
+    toggleSpeaker: document.getElementById('toggleSpeaker'),
+    micStatus: document.getElementById('micStatus'),
+    speakerStatus: document.getElementById('speakerStatus'),
+    voiceStatus: document.getElementById('voiceStatus'),
+    voiceParticipants: document.getElementById('voiceParticipants'),
+    voiceUsersList: document.getElementById('voiceUsersList'),
+    microphoneSelect: document.getElementById('microphoneSelect'),
+    speakerSelect: document.getElementById('speakerSelect'),
+
+    bgMusic: document.getElementById('bgMusic'),
+    bellSound: document.getElementById('bellSound'),
+    cardMoveSound: document.getElementById('cardMoveSound'),
+    chatNotifySound: document.getElementById('chatNotifySound'),
+    panelSound: document.getElementById('panelSound'),
+    musicToggle: document.getElementById('musicToggle'),
+    settingsCornerBtn: document.getElementById('settingsCornerBtn')
+  };
+
+  const CONFIG = {
+    inner: { count: 17, holePct: 35, title: 'Números 1-17' },
+    outer: {
+      count: 8,
+      holePct: 28,
+      title: 'Secciones de Desarrollo Sostenible',
+      names: [
+        'Pobreza y desigualdad social',
+        'Hambre y falta de acceso a alimentos', 
+        'Salud y bienestar insuficientes',
+        'Educación desigual o limitada',
+        'Desigualdad de género y discriminación',
+        'Degradación ambiental y cambio climático',
+        'Consumo y producción no sostenibles',
+        'Falta de paz, justicia e instituciones sólidas'
+      ],
+      images: Array.from({ length: 8 }, (_, i) => `out${i + 1}`), // Solo nombres base, sin extensión
+      imageExtensions: ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp'] // Extensiones soportadas
+    },
+    assets: {
+      diceFaces: [1, 2, 3, 4, 5, 6].map(n => `dice-face${n}`), // Solo nombres base
+      dicePlaceholder: 'dice-placeholder' // Sin extensión
+    }
+  };
+
+  const state = {
+    mySocketId: null,
+    myHand: [],
+    players: [],
+    currentTurn: 0,
+    phase: 'awaitRoll',
+    diceValue: null,
+    rotValue: 0,
+    diceRing: null,
+    deckCount: 72,
+    discardCount: 0,
+    hasSkipped: false,
+    hasDrawn: false,
+    hasPlayedCards: false,
+    volume: {
+      master: parseFloat(localStorage.getItem('basta_vol_master') ?? '1'),
+      music: parseFloat(localStorage.getItem('basta_vol_music') ?? '0.7'),
+      fx: parseFloat(localStorage.getItem('basta_vol_fx') ?? '0.8'),
+      voice: parseFloat(localStorage.getItem('basta_vol_voice') ?? '1')
+    },
+    musicPlaying: true,  // Música activa por defecto
+    unreadMessages: 0
+  };
+
+  const voiceState = {
+    localStream: null,
+    processedStream: null,
+    peerConnections: new Map(),
+    remoteAudios: new Map(),
+    micEnabled: false,
+    speakerEnabled: true,
+    audioContext: null,
+    micGainNode: null,
+    analyser: null,
+    selectedMicId: null,
+    selectedSpeakerId: null
+  };
+
+  const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+  function showDice(src) {
+    // Ya no se usa esta función, el dado se activa manualmente
+  }
+
+  function showCustomDiceAnimation() {
+    if (!elements.customDiceContainer || !elements.customDice) return;
+    
+    // Desenfocar el fondo
+    document.body.classList.add('dice-blur');
+    
+    // Mostrar el contenedor del dado
+    elements.customDiceContainer.classList.add('active');
+    
+    // Iniciar animación de rodadura
+    elements.customDice.classList.add('rolling');
+    
+    // Ocultar después de la animación y remover blur
+    setTimeout(() => {
+      elements.customDiceContainer.classList.remove('active');
+      elements.customDice.classList.remove('rolling');
+      document.body.classList.remove('dice-blur');
+    }, 2000);
+  }
+
+  function showDiceResult(value) {
+    if (!elements.customDiceContainer || !elements.customDice) return;
+    
+    // Desenfocar el fondo
+    document.body.classList.add('dice-blur');
+    
+    // Mostrar el contenedor del dado
+    elements.customDiceContainer.classList.add('active');
+    
+    // Mostrar la cara del resultado sin animación
+    elements.customDice.style.transform = getFaceTransform(value);
+    
+    // Ocultar después de 1.5 segundos
+    setTimeout(() => {
+      elements.customDiceContainer.classList.remove('active');
+      elements.customDice.style.transform = '';
+      document.body.classList.remove('dice-blur');
+    }, 1500);
+  }
+
+  function getFaceTransform(value) {
+    // Mapear valores a transformaciones de caras
+    const transforms = {
+      1: 'rotateY(0deg) rotateX(0deg)',      // face1
+      2: 'rotateY(90deg) rotateX(0deg)',     // face2  
+      3: 'rotateY(180deg) rotateX(0deg)',    // face3
+      4: 'rotateY(-90deg) rotateX(0deg)',    // face4
+      5: 'rotateX(90deg) rotateY(0deg)',     // face5 (Derechos Humanos)
+      6: 'rotateX(-90deg) rotateY(0deg)'     // face6
+    };
+    return transforms[value] || transforms[1];
+  }
+
+  function applyVolumes() {
+    const master = clamp(state.volume.master, 0, 1);
+    const musicVol = clamp(state.volume.music, 0, 1);
+    const fxVol = clamp(state.volume.fx, 0, 1);
+    const voiceVol = clamp(state.volume.voice, 0, 1);
+
+    if (elements.bgMusic) elements.bgMusic.volume = master * musicVol;
+
+    [elements.bellSound, elements.cardMoveSound, elements.chatNotifySound, elements.panelSound]
+      .forEach(a => { if (a) a.volume = master * fxVol; });
+
+    voiceState.remoteAudios.forEach((audio, userId) => {
+      const finalVolume = master * voiceVol;
+      audio.volume = finalVolume;
+      console.log(`🔊 Aplicando volumen a audio de ${userId}:`, {
+        master: master,
+        voice: voiceVol,
+        final: finalVolume,
+        muted: audio.muted,
+        paused: audio.paused
+      });
+    });
+
+    // Conectar con AudioManager
+    if (window.audioManager) {
+      window.audioManager.setMasterVolumeLevel(master);
+      window.audioManager.setMusicVolume(musicVol);
+      window.audioManager.setFxVolume(fxVol);
+      window.audioManager.setVoiceVolume(voiceVol);
+    }
+  }
+
+  function setSlider(el, val, labelEl) {
+    if (!el) return;
+    el.value = String(val * 100);
+    if (labelEl) labelEl.textContent = `${Math.round(val * 100)}%`;
+  }
+
+  function bindSlider(el, key, labelEl) {
+    if (!el) return;
+    el.addEventListener('input', () => {
+      const v = parseFloat(el.value) / 100;
+      state.volume[key] = v;
+      localStorage.setItem(`basta_vol_${key}`, String(v));
+      if (labelEl) labelEl.textContent = `${Math.round(v * 100)}%`;
+      applyVolumes();
+    });
+  }
+
+  async function ensureMicProcessing() {
+    if (!voiceState.localStream) return;
+    if (!voiceState.audioContext) {
+      voiceState.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const src = voiceState.audioContext.createMediaStreamSource(voiceState.localStream);
+    const gain = voiceState.audioContext.createGain();
+    gain.gain.value = 1.0;
+    const dest = voiceState.audioContext.createMediaStreamDestination();
+    src.connect(gain).connect(dest);
+
+    voiceState.micGainNode = gain;
+    voiceState.processedStream = dest.stream;
+
+    const processedTrack = voiceState.processedStream.getAudioTracks()[0];
+    voiceState.peerConnections.forEach((pc) => {
+      const sender = pc.getSenders().find(s => s.track && s.track.kind === 'audio');
+      if (sender && processedTrack) sender.replaceTrack(processedTrack);
+    });
+  }
+
+  function playSound(audioElement) {
+    if (!audioElement) {
+      console.error('Elemento de audio no encontrado');
+      return;
+    }
+
+    console.log('Reproduciendo sonido:', audioElement.id);
+
+    // Si es la campana y no tiene fuente, generar sonido sintético
+    if (audioElement.id === 'bellSound' && !audioElement.currentSrc) {
+      console.log('⚠️ Generando sonido de campana sintético');
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
+        gainNode.gain.value = 0.3 * clamp(state.volume.master, 0, 1) * clamp(state.volume.fx, 0, 1);
+
+        oscillator.start();
+        setTimeout(() => {
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+          setTimeout(() => oscillator.stop(), 300);
+        }, 100);
+
+        console.log('✅ Sonido de campana generado');
+        return;
+      } catch (err) {
+        console.error('Error al generar sonido:', err);
+      }
+    }
+
+    audioElement.currentTime = 0;
+    audioElement.play().catch((err) => {
+      console.error('Error al reproducir audio:', err);
+      console.log('Elemento:', audioElement);
+      console.log('Fuente:', audioElement.src || audioElement.currentSrc || 'Sin fuente');
+    });
+  }
+
+  function requestHandWithRetry(attempts = 3, delayMs = 250) {
+    socket.emit('game:requestHand');
+    let tries = 1;
+    const timer = setInterval(() => {
+      if (state.myHand && state.myHand.length > 0) {
+        clearInterval(timer);
+        return;
+      }
+      tries++;
+      if (tries > attempts) {
+        clearInterval(timer);
+        console.warn('No se recibió la mano tras reintentos.');
+        return;
+      }
+      console.debug(`Reintentando solicitar mano (${tries}/${attempts})`);
+      socket.emit('game:requestHand');
+    }, delayMs);
+  }
+
+  elements.musicToggle?.addEventListener('click', () => {
+    console.log('🎵 Click en musicToggle');
+    
+    // Verificar que AudioManager esté disponible
+    if (!window.audioManager) {
+      console.error('❌ AudioManager no está disponible');
+      return;
+    }
+    
+    // Usar AudioManager para control maestro de audio
+    const currentStatus = window.audioManager.getStatus();
+    console.log('🎵 Estado actual:', currentStatus);
+    const newEnabled = !currentStatus.soundEnabled;
+    console.log('🎵 Nuevo estado:', newEnabled ? 'activado' : 'desactivado');
+    
+    window.audioManager.setMasterVolume(newEnabled);
+    window.audioManager.enableUserInteraction(); // Activar después de interacción
+    
+    // Actualizar UI de ambos botones
+    updateMusicButtonsUI(newEnabled);
+    state.musicPlaying = newEnabled;
+  });
+
+  function isMyTurn(players, currentTurn) {
+    return players?.[currentTurn]?.id === state.mySocketId;
+  }
+
+  function setHandLocked(locked) {
+    elements.playerHand?.classList.toggle('locked', !!locked);
+  }
+
+  function showBigMessage(text, duration = 3000, className = 'basta') {
+    const msg = document.createElement('div');
+    msg.className = `big-message ${className}`;
+    msg.textContent = text;
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), duration);
+    // Ya no actualiza automáticamente el mensaje de acciones
+  }
+
+  function showBigMessageWithColor(text, duration = 3000, className = 'basta', backgroundColor = null) {
+    const msg = document.createElement('div');
+    msg.className = `big-message ${className}`;
+    msg.textContent = text;
+    if (backgroundColor) {
+      msg.style.backgroundColor = backgroundColor;
+      msg.style.border = `3px solid ${backgroundColor}`;
+      msg.style.boxShadow = `0 0 20px ${backgroundColor}`;
+    }
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), duration);
+  }
+
+  // Función para mostrar mensaje de turno (fijo durante el turno)
+  function showTurnMessage(text) {
+    if (elements.turnMessage) {
+      elements.turnMessage.textContent = text;
+    }
+  }
+
+  // Función para mostrar mensaje de acción (dinámico)
+  function showActionMessage(text) {
+    if (elements.message) {
+      elements.message.textContent = text;
+    }
+  }
+
+  // Función para limpiar mensajes
+  function clearMessages() {
+    if (elements.turnMessage) elements.turnMessage.textContent = '';
+    if (elements.message) elements.message.textContent = '';
+  }
+
+  // Función para manejar la visibilidad del mensaje Leeme
+  function updateLeemeMessage() {
+    const infoPanelLeft = elements.infoPanelLeft;
+    if (!infoPanelLeft) return;
+
+    // Verificar si hay algún panel lateral abierto
+    const hasOpenPanel = elements.rulesPanel?.classList.contains('show') ||
+                        elements.elementalPanel?.classList.contains('show') ||
+                        elements.settingsPanel?.classList.contains('show') ||
+                        elements.chatPanel?.classList.contains('show') ||
+                        elements.voiceChatPanel?.classList.contains('show');
+
+    // Si hay un panel abierto, ocultar mensaje Leeme
+    if (hasOpenPanel) {
+      infoPanelLeft.classList.add('panel-expanded');
+    } else {
+      infoPanelLeft.classList.remove('panel-expanded');
+    }
+  }
+
+  function updatePlayersList(players) {
+    let panel = document.getElementById('playersListPanel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'playersListPanel';
+      panel.className = 'players-list-panel';
+      document.body.appendChild(panel);
+    }
+    panel.style.display = 'block';
+
+    // Ajustar tamaño según número de jugadores
+    panel.className = 'players-list-panel';
+    if (players && players.length === 2) {
+      panel.classList.add('two-players');
+    } else if (players && players.length === 3) {
+      panel.classList.add('three-players');
+    } else if (players && players.length === 4) {
+      panel.classList.add('four-players');
+    }
+
+    panel.innerHTML = '<h3>👥 Jugadores</h3><div class="players-container"></div>';
+    const container = panel.querySelector('.players-container');
+
+    (players || []).forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'player-item';
+      if (p.isActive) row.classList.add('active-player');
+      if (p.id === state.mySocketId) row.classList.add('my-player');
+      row.innerHTML = `
+        <span class="player-icon">${p.isActive ? '👉' : '👤'}</span>
+        <span class="player-name">${p.name}</span>
+        <span class="player-cards">${p.cardCount} 🃏</span>
+      `;
+      container.appendChild(row);
+    });
+  }
+
+  function updateUIByPhase(players, currentTurn, phase) {
+    const mine = isMyTurn(players, currentTurn);
+    if (elements.rollBtn) elements.rollBtn.disabled = !(mine && phase === 'awaitRoll');
+
+    const canSpin = mine && phase === 'awaitSpin';
+    if (elements.wheel) {
+      elements.wheel.classList.toggle('locked', !canSpin);
+      elements.wheel.style.pointerEvents = canSpin ? 'auto' : 'none';
+    }
+
+    const isPlayPhase = phase === 'play';
+    if (elements.bellButton) elements.bellButton.disabled = !(isPlayPhase && state.hasPlayedCards);
+    if (elements.skipTurnBtn) elements.skipTurnBtn.disabled = !(isPlayPhase && !state.hasSkipped);
+    if (elements.drawCardBtn) elements.drawCardBtn.disabled = !(isPlayPhase && !state.hasDrawn);
+
+    setHandLocked(!isPlayPhase || state.hasSkipped);
+    
+    // La lógica de mensajes de selección ahora está en los eventos específicos
+  }
+
+  function calculateCardSpacing(totalCards) {
+    if (!elements.playerHand || totalCards <= 12) return;
+    
+    const containerWidth = elements.playerHand.offsetWidth - 30; // Restar padding
+    const cardWidth = window.innerWidth <= 1200 ? 140 : 160; // Responsive card width
+    const maxVisibleWidth = containerWidth;
+    const spacing = Math.max(8, (maxVisibleWidth - cardWidth) / (totalCards - 1));
+    
+    const cards = elements.playerHand.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+      if (index < cards.length - 1) {
+        const overlap = Math.max(0, cardWidth - spacing);
+        card.style.marginRight = `-${overlap}px`;
+      } else {
+        card.style.marginRight = '0px';
+      }
+    });
+  }
+
+  // === FUNCIÓN PARA COLOREAR LETRAS INICIALES (DESHABILITADA) ===
+  function colorizeInitialLetters(text, sectionColor) {
+    // Función deshabilitada - devuelve texto original
+    return text || '';
+  }
+
+  function renderMyHand(hand) {
+    if (!elements.playerHand) return;
+
+    const currentCards = Array.from(elements.playerHand.querySelectorAll('.card'));
+    const currentIds = currentCards.map(c => c.dataset.cardId);
+    const newIds = (hand || []).map(c => String(c.id));
+
+    currentCards.forEach(cardEl => {
+      if (!newIds.includes(cardEl.dataset.cardId)) {
+        // Deshabilitar interacciones inmediatamente al empezar a removerse
+        cardEl.style.pointerEvents = 'none';
+        cardEl.classList.add('card-removing');
+        
+        cardEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        cardEl.style.opacity = '0';
+        cardEl.style.transform = 'scale(0.8)';
+        setTimeout(() => cardEl.remove(), 300);
+      }
+    });
+
+    (hand || []).forEach((card) => {
+      const cardId = String(card.id);
+      if (!currentIds.includes(cardId)) {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'card dealt';
+        if (card.isWildcard) cardEl.classList.add('wildcard');
+        cardEl.dataset.cardId = card.id;
+        if (card.section) cardEl.dataset.section = card.section;
+
+        const categoryColor = card.color || '#ffffff';
+        
+        // Aplicar estilos básicos inmediatamente (sin imagen de fondo)
+        if (card.isWildcard) {
+          cardEl.style.background = `linear-gradient(rgba(255, 215, 0, 0.9), rgba(255, 165, 0, 0.9))`;
+          cardEl.style.borderLeft = `6px solid #FF6347`;
+          cardEl.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.6)';
+        } else {
+          const rgb = categoryColor.length === 7 ? 
+            [parseInt(categoryColor.slice(1,3), 16), parseInt(categoryColor.slice(3,5), 16), parseInt(categoryColor.slice(5,7), 16)] :
+            [255, 255, 255];
+          cardEl.style.background = `linear-gradient(rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.8), rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.6))`;
+          cardEl.style.borderLeft = `8px solid ${categoryColor}`;
+          cardEl.style.borderTop = `3px solid ${categoryColor}`;
+          cardEl.style.boxShadow = `0 6px 12px rgba(0,0,0,0.3), inset 0 0 20px rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.3)`;
+        }
+
+        // Contenido inicial (sin imagen)
+        cardEl.innerHTML = `
+          <div class="card-text">${card.isWildcard ? '★ ' : ''}${card.text}</div>
+        `;
+
+        // Cargar imagen con múltiples extensiones y actualizar cuando esté lista
+        loadCardImage(card.image, (finalImagePath) => {
+          console.log('✅ Imagen cargada:', finalImagePath);
+          
+          // Aplicar solo gradiente de fondo, sin imagen de fondo
+          if (card.isWildcard) {
+            cardEl.style.backgroundImage = `linear-gradient(rgba(255, 215, 0, 0.8), rgba(255, 165, 0, 0.8))`;
+          } else {
+            const rgb = categoryColor.length === 7 ? 
+              [parseInt(categoryColor.slice(1,3), 16), parseInt(categoryColor.slice(3,5), 16), parseInt(categoryColor.slice(5,7), 16)] :
+              [255, 255, 255];
+            cardEl.style.backgroundImage = `linear-gradient(rgba(255, 255, 255, 0.2), rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.6))`;
+          }
+          
+          // Actualizar contenido con imagen controlada
+          cardEl.innerHTML = `
+            <img class="card-image" src="${finalImagePath}" alt="${card.text}">
+            <div class="card-text">${card.isWildcard ? '★ ' : ''}${card.text}</div>
+          `;
+        });
+
+        cardEl.addEventListener('click', () => {
+          // Verificar que no estamos en transición de apilamiento
+          if (elements.playerHand.classList.contains('transitioning-stack')) {
+            console.log('⚠️ Click ignorado: cartas en transición de apilamiento');
+            return;
+          }
+          
+          // Verificar que la carta no está siendo removida
+          if (cardEl.classList.contains('card-removing')) {
+            console.log('⚠️ Click ignorado: carta siendo removida');
+            return;
+          }
+          
+          if (state.phase === 'play' && !state.hasSkipped && !cardEl.classList.contains('card-playing')) {
+            // Marcar carta como "jugándose" para prevenir doble click
+            cardEl.classList.add('card-playing');
+            cardEl.style.pointerEvents = 'none';
+            cardEl.style.opacity = '0.7';
+            
+            playSound(elements.cardMoveSound);
+            socket.emit('game:playCard', { cardId: card.id });
+            state.hasPlayedCards = true;
+            updateUIByPhase(state.phase, state.currentTurn === state.playerId);
+            
+            // Remover la carta después de un breve delay (será removida por el servidor)
+            setTimeout(() => {
+              if (cardEl.parentNode) {
+                cardEl.remove();
+              }
+            }, 500);
+          }
+        });
+
+        elements.playerHand.appendChild(cardEl);
+      }
+    });
+
+    // Aplicar apilamiento según resolución y número de cartas
+    const totalCards = elements.playerHand.querySelectorAll('.card').length;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    // Determinar umbral de apilado según resolución
+    let stackThreshold = 12; // Por defecto
+    if (width >= 2560 && height >= 1440) {
+      stackThreshold = 15; // 4K: más espacio, más cartas antes de apilar
+    } else if (width >= 1680 && height >= 1050) {
+      stackThreshold = 9; // Desktop 1680x1050: apilar desde 9 cartas
+    } else if (width >= 1440 && height >= 900) {
+      stackThreshold = 9; // Desktop 1440x900: apilar desde 9 cartas
+    } else if (width >= 1366 && height >= 768) {
+      stackThreshold = 8; // Laptop: apilar más temprano
+    } else if (width >= 1280 && height >= 720) {
+      stackThreshold = 7; // HD: espacio limitado
+    } else if (width >= 1024 && height >= 600) {
+      stackThreshold = 6; // Netbook: muy poco espacio
+    }
+    
+    const wasStacked = elements.playerHand.classList.contains('stacked');
+    const shouldBeStacked = totalCards > stackThreshold;
+    
+    // Si hay cambio de estado de apilamiento, deshabilitar interacciones temporalmente
+    if (wasStacked !== shouldBeStacked) {
+      elements.playerHand.classList.add('transitioning-stack');
+      
+      // Deshabilitar clicks en cartas durante la transición
+      const cards = elements.playerHand.querySelectorAll('.card');
+      cards.forEach((card) => {
+        card.style.pointerEvents = 'none';
+      });
+      
+      // Reactivar después de la transición (300ms + buffer)
+      setTimeout(() => {
+        elements.playerHand.classList.remove('transitioning-stack');
+        const currentCards = elements.playerHand.querySelectorAll('.card');
+        currentCards.forEach((card) => {
+          card.style.pointerEvents = '';
+        });
+      }, 400);
+    }
+    
+    if (shouldBeStacked) {
+      elements.playerHand.classList.add('stacked');
+      elements.playerHand.setAttribute('data-card-count', totalCards);
+      
+      // Calcular espaciado dinámico
+      calculateCardSpacing(totalCards);
+    } else {
+      elements.playerHand.classList.remove('stacked');
+      elements.playerHand.removeAttribute('data-card-count');
+      
+      // Resetear márgenes para el modo normal
+      const cards = elements.playerHand.querySelectorAll('.card');
+      cards.forEach((card) => {
+        card.style.marginRight = '';
+      });
+    }
+  }
+
+  function createInnerNumbers() {
+    if (!elements.ring) return;
+    const rect = elements.ring.getBoundingClientRect();
+    if (!rect.width) return;
+    const radius = rect.width / 2;
+    const innerR = radius * (CONFIG.inner.holePct / 100);
+    
+    // Ajustes específicos por resolución: hacer el círculo de números más grande
+    let labelR = (radius + innerR) / 2;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    if (width >= 2560 && height >= 1440) {
+      // 4K: radio 25% mayor
+      labelR = labelR * 1.25;
+    } else if (width >= 1680 && height >= 1050) {
+      // Desktop 1680x1050: radio 20% mayor
+      labelR = labelR * 1.20;
+    } else if (width >= 1440 && height >= 900) {
+      // Desktop 1440x900: radio 15% mayor
+      labelR = labelR * 1.15;
+    } else if (width >= 1366 && height >= 768) {
+      // Laptop 1366x768: radio 10% mayor
+      labelR = labelR * 1.25;
+    } else if (width >= 1280 && height >= 720) {
+      // HD 1280x720: radio 8% mayor
+      labelR = labelR * 1.08;
+    } else if (width >= 1024 && height >= 600) {
+      // Netbook 1024x600: radio 5% mayor
+      labelR = labelR * 1.05;
+    }
+    const sectorDeg = 360 / CONFIG.inner.count;
+
+    elements.ring.querySelectorAll('.ring-label').forEach(n => n.remove());
+    for (let i = 0; i < CONFIG.inner.count; i++) {
+      const ang = (i + 0.5) * sectorDeg;
+      const el = document.createElement('div');
+      el.className = 'ring-label';
+      el.textContent = String(i + 1);
+      el.style.transform = `rotate(${ang}deg) translate(0, -${labelR}px) rotate(${-ang}deg)`;
+      elements.ring.appendChild(el);
+    }
+  }
+
+  // Función helper para cargar imágenes con múltiples extensiones
+  function tryLoadImageWithExtensions(baseName, extensions, callback, placeholderName = 'placeholder') {
+    let index = 0;
+    
+    function tryNext() {
+      if (index >= extensions.length) {
+        // Si no se encontró ninguna extensión, usar placeholder
+        callback(`img/${placeholderName}.png`);
+        return;
+      }
+      
+      const img = new Image();
+      const currentPath = `img/${baseName}${extensions[index]}`;
+      
+      img.onload = () => {
+        // Imagen cargada exitosamente
+        callback(currentPath);
+      };
+      
+      img.onerror = () => {
+        // Intentar siguiente extensión
+        index++;
+        tryNext();
+      };
+      
+      img.src = currentPath;
+    }
+    
+    tryNext();
+  }
+
+  // Función para cargar imágenes de cartas en subdirectorios
+  function tryLoadImageWithExtensionsInDirectory(baseName, subdirectory, extensions, callback, placeholderName = 'placeholder') {
+    let index = 0;
+    
+    function tryNext() {
+      if (index >= extensions.length) {
+        // Si no se encontró ninguna extensión, usar placeholder
+        callback(`img/${placeholderName}.png`);
+        return;
+      }
+      
+      const img = new Image();
+      const currentPath = `img/${subdirectory}${baseName}${extensions[index]}`;
+      
+      img.onload = () => {
+        // Imagen cargada exitosamente
+        console.log('✅ Imagen cargada exitosamente:', currentPath);
+        callback(currentPath);
+      };
+      
+      img.onerror = () => {
+        // Intentar siguiente extensión
+        console.log('❌ No encontrada:', currentPath);
+        index++;
+        tryNext();
+      };
+      
+      img.src = currentPath;
+    }
+    
+    tryNext();
+  }
+
+  // Función específica para cargar imágenes de cartas
+  function loadCardImage(cardImageName, callback) {
+    // Remover extensión si ya la tiene
+    const baseName = cardImageName.replace(/\.(png|jpg|jpeg|gif|svg)$/i, '');
+    console.log('🖼️ Cargando imagen:', { original: cardImageName, baseName });
+    
+    // Mapeo de prefijos de archivo a directorios
+    const directoryMap = {
+      'PDS_': 'Pobreza y desigualdad social',
+      'HFAA_': 'Hambre y falta de acceso a alimentos',
+      'SBI_': 'Salud y bienestar insuficientes', 
+      'EDL_': 'Educacion desigual o limitada',
+      'DGD_': 'Desigualdad de genero y discriminacion',
+      'DACC_': 'Degradacion ambiental y cambio climatico',
+      'CPNS_': 'Consumo y produccion no sostenibles',
+      'FPJIS_': 'Falta de paz, justicia e instituciones solidas'
+    };
+    
+    // Determinar el subdirectorio basándose en el prefijo del nombre
+    let subdirectory = '';
+    
+    // Los wildcards y otros archivos sin prefijo van en la raíz de img/
+    if (baseName.startsWith('wildcard_') || baseName.startsWith('card-') || baseName.startsWith('dice-') || !baseName.includes('_')) {
+      subdirectory = '';
+    } else {
+      // Buscar mapeo por prefijo
+      for (const [prefix, dir] of Object.entries(directoryMap)) {
+        if (baseName.startsWith(prefix)) {
+          subdirectory = dir + '/';
+          break;
+        }
+      }
+    }
+    
+    tryLoadImageWithExtensionsInDirectory(baseName, subdirectory, CONFIG.outer.imageExtensions, callback, 'card-placeholder');
+  }
+
+  function createOuterImages() {
+    if (!elements.outer || !elements.outerLabels) return;
+    const rect = elements.outer.getBoundingClientRect();
+    if (!rect.width) return;
+    const radius = rect.width / 2;
+    const theInnerR = radius * (CONFIG.outer.holePct / 100);
+    
+    // Ajustes específicos por resolución: hacer el círculo de imágenes más grande
+    // Posicionar las imágenes más hacia el exterior para que ocupen mejor cada sección
+    let labelR = (radius + theInnerR) / 2;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    if (width >= 2560 && height >= 1440) {
+      // 4K: radio 40% mayor para imágenes más grandes
+      labelR = labelR * 1.40;
+    } else if (width >= 1920 && height >= 1080) {
+      // Full HD 1920x1080: radio reducido para mejor ajuste
+      labelR = labelR * 1.05;
+    } else if (width >= 1680 && height >= 1050) {
+      // Desktop 1680x1050: radio 35% mayor
+      labelR = labelR * 1.35;
+    } else if (width >= 1440 && height >= 900) {
+      // Desktop 1440x900: radio 30% mayor
+      labelR = labelR * 1.30;
+    } else if (width >= 1366 && height >= 768) {
+      // Laptop 1366x768: radio reducido para mejor ajuste
+      labelR = labelR * 1.10;
+    } else if (width >= 1280 && height >= 720) {
+      // HD 1280x720: radio 20% mayor
+      labelR = labelR * 1.20;
+    } else if (width >= 1024 && height >= 600) {
+      // Netbook 1024x600: radio 15% mayor
+      labelR = labelR * 1.15;
+    }
+    
+    const sectorDeg = 360 / CONFIG.outer.count;
+
+    // Ajuste vertical específico para el círculo de imágenes (sin afectar otros anillos)
+    const verticalOffset = 20; // Píxeles hacia arriba (negativo = arriba, positivo = abajo)
+    
+    elements.outerLabels.innerHTML = '';
+    for (let i = 0; i < CONFIG.outer.count; i++) {
+      const ang = (i + 0.5) * sectorDeg;
+      const angRad = (ang * Math.PI) / 180; // Convertir a radianes
+      
+      // Calcular posición absoluta X,Y
+      const x = Math.sin(angRad) * labelR;
+      const y = -Math.cos(angRad) * labelR + verticalOffset; // Aplicar desplazamiento vertical
+      
+      const wrap = document.createElement('div');
+      wrap.className = 'outer-label';
+      wrap.style.transform = `translate(${x}px, ${y}px)`;
+
+      const img = document.createElement('img');
+      img.alt = CONFIG.outer.names[i];
+      
+      // Usar la nueva función para cargar imágenes con múltiples extensiones
+      tryLoadImageWithExtensions(CONFIG.outer.images[i], CONFIG.outer.imageExtensions, (finalSrc) => {
+        img.src = finalSrc;
+      }, 'out-placeholder');
+
+      wrap.appendChild(img);
+      elements.outerLabels.appendChild(wrap);
+    }
+  }
+
+  function updateDiscardPileVisual() {
+    const pile = document.getElementById('discardPile');
+    if (!pile) return;
+    const countEl = pile.querySelector('.pile-count');
+    if (countEl) countEl.textContent = String(state.discardCount);
+    if (state.discardCount > 0) {
+      pile.style.backgroundImage = "url('img/card-back.png')";
+    } else {
+      pile.style.backgroundImage = 'none';
+    }
+  }
+
+  // ===== EVENTOS DE SOCKET =====
+
+  socket.on('connect', () => {
+    state.mySocketId = socket.id;
+    setTimeout(() => requestHandWithRetry(4, 300), 100);
+  });
+
+  let hasJoinedLobby = false;
+  let isPlayerReady = false;
+
+  function resetLobbyState() {
+    hasJoinedLobby = false;
+    isPlayerReady = false;
+    elements.playerNameInput.disabled = false;
+    elements.playerNameInput.value = '';
+    elements.lobbyPlayers.style.display = 'none';
+    elements.lobbyChatButtons.style.display = 'none';
+    elements.cancelBtn.style.display = 'none';
+    elements.changeNameBtn.style.display = 'none';
+    elements.leaveGameLobbyBtn.style.display = 'none';
+    elements.readyBtn.style.display = 'inline-block';
+    elements.readyBtn.textContent = 'Entrar';
+    elements.lobbyMsg.textContent = 'Esperando jugadores...';
+    elements.playersList.innerHTML = '';
+  }
+
+  elements.readyBtn?.addEventListener('click', () => {
+    const name = (elements.playerNameInput?.value || '').trim().substring(0, 18);
+    if (!name) {
+      elements.lobbyMsg.textContent = 'Escribe tu nombre.';
+      return;
+    }
+
+    if (!hasJoinedLobby) {
+      // Primero unirse al lobby
+      socket.emit('lobby:join', { name });
+      hasJoinedLobby = true;
+      
+      elements.playerNameInput.disabled = true;
+      elements.lobbyPlayers.style.display = 'block';
+      elements.lobbyChatButtons.style.display = 'flex';
+      elements.changeNameBtn.style.display = 'inline-block';
+      elements.leaveGameLobbyBtn.style.display = 'inline-block';
+      elements.readyBtn.textContent = '¡Listo!';
+      elements.cancelBtn.style.display = 'inline-block';
+      // Mostrar botón de configuración durante el registro/lobby
+      elements.settingsCornerBtn.style.display = 'flex';
+      
+      try { localStorage.setItem('basta_name', name); } catch {}
+    } else if (!isPlayerReady) {
+      // Luego marcar como listo
+      socket.emit('lobby:ready');
+      isPlayerReady = true;
+      elements.readyBtn.style.display = 'none';
+      elements.changeNameBtn.style.display = 'none';
+    }
+  });
+
+  elements.cancelBtn?.addEventListener('click', () => {
+    if (hasJoinedLobby) {
+      // Si ya está en el lobby, mostrar modal de confirmación
+      elements.exitModal.style.display = 'flex';
+    } else {
+      // Si no está en lobby, salir directamente
+      socket.emit('lobby:cancel');
+    }
+  });
+
+  // Botones del modal de salida
+  elements.exitConfirmBtn?.addEventListener('click', () => {
+    elements.exitModal.style.display = 'none';
+    socket.emit('lobby:cancel');
+    elements.settingsCornerBtn.style.display = 'none';
+    resetLobbyState();
+  });
+
+  elements.exitCancelBtn?.addEventListener('click', () => {
+    elements.exitModal.style.display = 'none';
+  });
+
+  // Botones de chat del lobby
+  elements.lobbyChatToggle?.addEventListener('click', () => {
+    if (elements.chatToggle) {
+      elements.chatToggle.click();
+    }
+  });
+
+  elements.lobbyVoiceChatToggle?.addEventListener('click', () => {
+    if (elements.voiceChatToggle) {
+      elements.voiceChatToggle.click();
+    }
+  });
+
+  // Botón de música del lobby
+  elements.lobbyMusicToggle?.addEventListener('click', () => {
+    console.log('🎵 Click en lobbyMusicToggle');
+    
+    // Verificar que AudioManager esté disponible
+    if (!window.audioManager) {
+      console.error('❌ AudioManager no está disponible');
+      return;
+    }
+    
+    // Usar AudioManager para control maestro de audio
+    const currentStatus = window.audioManager.getStatus();
+    console.log('🎵 Estado actual:', currentStatus);
+    const newEnabled = !currentStatus.soundEnabled;
+    console.log('🎵 Nuevo estado:', newEnabled ? 'activado' : 'desactivado');
+    
+    window.audioManager.setMasterVolume(newEnabled);
+    window.audioManager.enableUserInteraction(); // Activar después de interacción
+    
+    // Actualizar UI de ambos botones
+    updateMusicButtonsUI(newEnabled);
+    state.musicPlaying = newEnabled;
+  });
+
+  // Botón configuración del lobby
+  elements.lobbySettingsToggle?.addEventListener('click', () => {
+    // Abrir panel de configuración de audio
+    if (elements.settingsToggle) {
+      elements.settingsToggle.click();
+    }
+  });
+
+  // Botón abandonar partida del lobby
+  elements.leaveGameLobbyBtn?.addEventListener('click', () => {
+    elements.exitModal.style.display = 'flex';
+  });
+
+  // Botón cambiar nombre
+  elements.changeNameBtn?.addEventListener('click', () => {
+    elements.playerNameInput.disabled = false;
+    elements.playerNameInput.focus();
+    elements.readyBtn.style.display = 'inline-block';
+    elements.readyBtn.textContent = 'Entrar';
+    elements.changeNameBtn.style.display = 'none';
+    elements.settingsCornerBtn.style.display = 'none';
+    hasJoinedLobby = false;
+    isPlayerReady = false;
+    socket.emit('lobby:cancel');
+  });
+
+  socket.on('lobby:update', ({ players, msg }) => {
+    elements.playersList.innerHTML = '';
+    players.forEach(p => {
+      const li = document.createElement('li');
+      const status = p.ready ? '✅ Listo' : '⏳ En espera';
+      li.textContent = `${p.name} - ${status}`;
+      li.style.color = p.ready ? '#4ade80' : '#fbbf24';
+      elements.playersList.appendChild(li);
+    });
+    if (msg) elements.lobbyMsg.textContent = msg;
+  });
+
+  socket.on('lobby:countdown', ({ count }) => {
+    if (elements.countdownDisplay) {
+      elements.countdownDisplay.textContent = count;
+      elements.countdownDisplay.style.display = 'block';
+    }
+  });
+
+  socket.on('lobby:countdownCanceled', () => {
+    if (elements.countdownDisplay) elements.countdownDisplay.style.display = 'none';
+    if (elements.lobbyMsg) elements.lobbyMsg.textContent = 'Esperando que todos los jugadores estén listos...';
+    
+    // Resetear estado de listo pero mantener en lobby
+    isPlayerReady = false;
+    elements.readyBtn.style.display = 'inline-block';
+    elements.readyBtn.textContent = '¡Listo!';
+    elements.changeNameBtn.style.display = 'inline-block';
+    elements.lobbyChatButtons.style.display = 'flex';
+    elements.cancelBtn.style.display = 'inline-block';
+  });
+
+  socket.on('game:start', () => {
+    elements.lobbyOverlay.classList.add('hidden');
+    if (elements.countdownDisplay) elements.countdownDisplay.style.display = 'none';
+    elements.settingsCornerBtn.style.display = 'none';
+    if (elements.fullscreenTip) elements.fullscreenTip.classList.add('hidden');
+    resetLobbyState();
+
+    // Marcar que el juego está activo y ocultar panel automático
+    gameActive = true;
+    if (elements.elementalPanel) {
+      elements.elementalPanel.classList.remove('show');
+    }
+    if (elements.elementalToggle) {
+      elements.elementalToggle.classList.remove('active');
+    }
+
+    // Abrir automáticamente el panel de reglas al iniciar
+    if (elements.rulesPanel && elements.rulesToggle) {
+      elements.rulesPanel.classList.add('show');
+      elements.rulesToggle.classList.add('active');
+      // Marcar el panel como expandido para ocultar el mensaje Leeme
+      elements.infoPanelLeft.classList.add('panel-expanded');
+    }
+
+    // Mostrar botón de abandonar partida
+    if (elements.leaveGameBtn) elements.leaveGameBtn.style.display = 'block';
+
+    requestHandWithRetry(5, 300);
+
+    state.discardCount = 0;
+    updateDiscardPileVisual();
+  });
+
+  socket.on('game:state', ({ players, currentTurn, phase, diceValue, deckCount }) => {
+    const previousTurn = state.currentTurn;
+    state.phase = phase || 'awaitRoll';
+    state.currentTurn = currentTurn ?? 0;
+    state.players = players || [];
+    
+    // Reset hasPlayedCards when turn changes or phase changes to not-play
+    if (previousTurn !== currentTurn || phase !== 'play') {
+      state.hasPlayedCards = false;
+    }
+
+    if (elements.currentPlayerName && players?.[currentTurn]) {
+      elements.currentPlayerName.textContent = players[currentTurn].name;
+      elements.turnIndicator.style.display = 'flex';
+    }
+
+    // Ya no mostramos mensajes de turno porque tenemos la tabla de jugadores
+
+    const deckCountEl = elements.cardDeck?.querySelector('.deck-count');
+    if (deckCountEl && typeof deckCount === 'number') {
+      deckCountEl.textContent = String(deckCount);
+    }
+
+    if (typeof diceValue === 'number' && diceValue >= 1 && diceValue <= 6) {
+      showDice(CONFIG.assets.diceFaces[diceValue - 1]);
+    } else {
+      showDice(CONFIG.assets.dicePlaceholder);
+    }
+
+    if (players?.length >= 2 && ['awaitRoll', 'awaitSpin', 'play'].includes(state.phase) && (!state.myHand || state.myHand.length === 0)) {
+      requestHandWithRetry(3, 300);
+    }
+
+    updatePlayersList(players);
+    updateUIByPhase(players, state.currentTurn, state.phase);
+  });
+
+  socket.on('game:myHand', ({ hand }) => {
+    console.debug('[game:myHand] recibidas:', hand?.length || 0);
+    console.table(hand?.map(c => ({
+      ID: c.id,
+      Imagen: c.image,
+      Texto: c.text,
+      Categoría: c.category,
+      Color: c.color
+    })));
+    state.myHand = hand || [];
+    renderMyHand(state.myHand);
+  });
+
+  // Alguien jugó una carta: añade metadata para animaciones
+  socket.on('game:cardPlayed', ({ playerId, playerName, cardId, cardImage, cardText, section, odsNumbers, color, sectionIndex, isWildcard }) => {
+    console.log('Carta jugada:', { playerId, playerName, cardId, section, odsNumbers, sectionIndex, isWildcard });
+
+    const cardEl = document.createElement('div');
+    cardEl.className = 'card';
+    if (isWildcard) cardEl.classList.add('wildcard');
+    cardEl.dataset.cardId = String(cardId);
+    if (playerId) cardEl.dataset.playerId = String(playerId);
+    if (playerName) cardEl.dataset.playerName = playerName;
+    if (typeof sectionIndex === 'number') cardEl.dataset.sectionIndex = String(sectionIndex);
+    if (section) cardEl.dataset.section = section;
+    if (odsNumbers) cardEl.dataset.odsNumbers = JSON.stringify(odsNumbers);
+    if (isWildcard) cardEl.dataset.isWildcard = 'true';
+
+    // Apariencia consistente con imagen de fondo y colores de sección
+    const c = color || '#fff';
+    
+    // Aplicar estilos básicos inmediatamente
+    if (isWildcard) {
+        cardEl.style.backgroundImage = `linear-gradient(rgba(255, 215, 0, 0.8), rgba(255, 165, 0, 0.8))`;
+        cardEl.style.borderLeft = `8px solid #FF6347`;
+        cardEl.style.borderTop = `3px solid #FF6347`;
+        cardEl.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.6)';
+    } else {
+        const rgb = c.length === 7 ? 
+          [parseInt(c.slice(1,3), 16), parseInt(c.slice(3,5), 16), parseInt(c.slice(5,7), 16)] :
+          [255, 255, 255];
+        cardEl.style.backgroundImage = `linear-gradient(rgba(255, 255, 255, 0.2), rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.6))`;
+        cardEl.style.borderLeft = `8px solid ${c}`;
+        cardEl.style.borderTop = `3px solid ${c}`;
+        cardEl.style.boxShadow = `0 6px 12px rgba(0,0,0,0.3), inset 0 0 20px rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.3)`;
+    }
+
+    // Agregar contenido inicial
+    cardEl.innerHTML = `<div class="card-text">${playerName || ''}: ${cardText}</div>`;
+    
+    // Insertar en DOM inmediatamente
+    elements.playedArea.appendChild(cardEl);
+
+    // Cargar imagen asincrónicamente
+    loadCardImage(cardImage, (finalImagePath) => {
+      console.log('Imagen de carta jugada cargada:', finalImagePath);
+      
+      // Aplicar solo gradientes, sin imagen de fondo
+      if (isWildcard) {
+        cardEl.style.backgroundImage = `linear-gradient(rgba(255, 215, 0, 0.8), rgba(255, 165, 0, 0.8))`;
+      } else {
+        const rgb = c.length === 7 ? 
+          [parseInt(c.slice(1,3), 16), parseInt(c.slice(3,5), 16), parseInt(c.slice(5,7), 16)] :
+          [255, 255, 255];
+        cardEl.style.backgroundImage = `linear-gradient(rgba(255, 255, 255, 0.2), rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.6))`;
+      }
+      
+      // Crear imagen controlada
+      const cardImage = document.createElement('img');
+      cardImage.className = 'card-image';
+      cardImage.src = finalImagePath;
+      cardImage.alt = cardText;
+      cardEl.insertBefore(cardImage, cardEl.firstChild);
+    });
+
+    // Quitarla de mi mano si era mía
+    state.myHand = state.myHand.filter(ca => ca.id !== cardId);
+    renderMyHand(state.myHand);
+    
+    // Mostrar mensaje de acción para carta jugada
+    if (playerId === state.mySocketId) {
+      showActionMessage('Jugaste una carta');
+    } else {
+      showActionMessage(`${playerName} jugó una carta`);
+    }
+  });
+
+  // Campana: sonido + mensaje de verificación
+socket.on('game:bellRang', ({ playerId, playerName }) => {
+  playSound(elements.bellSound);
+  if (playerId === state.mySocketId) {
+    showActionMessage('Tocaste la campana');
+  } else {
+    showActionMessage(`${playerName} tocó la campana`);
+  }
+});
+
+// Mensaje de verificación
+socket.on('game:verifyingMessage', ({ message }) => {
+  showBigMessage(message, 1500);
+  showActionMessage('Verificando cartas...');
+});
+
+// Anuncio de penalización 
+socket.on('game:penaltyAnnouncement', ({ message, names, suffix, isPlural }) => {
+  showBigMessage(message, 3800);
+  showActionMessage(message);
+});
+
+  // Veredicto y animaciones de verificación
+  // Estructura esperada:
+  // played: [{ cardId, playerId, playerName, valid: boolean, reason: 'wrongCategory'|'wrongNumber' }, ...]
+  // invalidPlayers: [{ playerId, playerName, drawCount }]
+  socket.on('game:verifyResult', async ({ played, invalidPlayers = [], deckCount }) => {
+    try {
+      const validIds = new Set((played || []).filter(p => p.valid).map(p => String(p.cardId)));
+      const invalid = (played || []).filter(p => !p.valid);
+
+      // Resaltar inválidas mientras se procesan las válidas
+      invalid.forEach(({ cardId }) => {
+        const el = getCardElById(cardId);
+        if (el) el.classList.add('hold-invalid');
+      });
+
+      // Anima válidas al descarte una por una
+      for (const { cardId } of played) {
+        if (!validIds.has(String(cardId))) continue;
+        const el = getCardElById(cardId);
+        if (!el) continue;
+        await animateToDiscard(el);
+        await new Promise(r => setTimeout(r, 120));
+      }
+
+      // Sacude y regresa inválidas al dueño
+      for (const item of invalid) {
+        const el = getCardElById(item.cardId);
+        if (!el) continue;
+        await animateShake(el);
+        await animateReturnToPlayer(el, item.playerId, item.playerName);
+        await new Promise(r => setTimeout(r, 120));
+      }
+
+      // Actualiza contador del mazo si viene del servidor
+      if (typeof deckCount === 'number') {
+        const deckCountEl = elements.cardDeck?.querySelector('.deck-count');
+        if (deckCountEl) deckCountEl.textContent = String(deckCount);
+      }
+
+      // El mensaje de penalización ahora se maneja por separado en 'game:penaltyAnnouncement'
+
+      // Avisar que terminó la animación
+      socket.emit('game:verifyDone');
+    } catch (err) {
+      console.warn('Error en verificación:', err);
+      socket.emit('game:verifyDone');
+    }
+  });
+
+  elements.rollBtn?.addEventListener('click', () => {
+    // Mostrar animación del dado y desenfocar el fondo
+    showCustomDiceAnimation();
+    socket.emit('game:rollDice');
+  });
+
+  socket.on('game:diceRolled', ({ value }) => {
+    showDice(CONFIG.assets.diceFaces[value - 1] || CONFIG.assets.dicePlaceholder);
+
+    state.diceRing = value <= 4 ? 'inner' : 'outer';
+    if (state.diceRing === 'inner') {
+      elements.ring?.classList.add('active');
+      elements.ring?.classList.remove('inactive');
+      elements.outer?.classList.add('inactive');
+      elements.outer?.classList.remove('active');
+      showBigMessage(`${CONFIG.inner.title} seleccionado`);
+      // Mostrar mensaje temporal de selección
+      showTurnMessage('Selecciona anillo y sección');
+    } else {
+      elements.outer?.classList.add('active');
+      elements.outer?.classList.remove('inactive');
+      elements.ring?.classList.add('inactive');
+      elements.ring?.classList.remove('active');
+      showBigMessage(`${CONFIG.outer.title} seleccionado`);
+      // Mostrar mensaje temporal de selección
+      showTurnMessage('Selecciona anillo y sección');
+    }
+  });
+
+  elements.wheel?.addEventListener('click', () => {
+    if (elements.wheel.classList.contains('locked')) return;
+    socket.emit('game:spinWheel');
+  });
+
+  socket.on('game:wheelSpinning', ({ rotation }) => {
+    state.rotValue = rotation;
+    elements.wheel.style.transition = 'transform 2.5s cubic-bezier(.17,.67,.35,1)';
+    elements.wheel.style.transform = `translate(-50%, -50%) rotate(${state.rotValue}deg)`;
+  });
+
+  elements.wheel?.addEventListener('transitionend', () => {
+    if (state.phase !== 'awaitSpin') return;
+    // La lógica del mensaje se maneja ahora en game:wheelResult
+    elements.wheel.classList.add('locked');
+    elements.wheel.style.pointerEvents = 'none';
+  });
+
+  // Resultado de la ruleta con información del servidor
+  socket.on('game:wheelResult', ({ mode, outerIndex, outerCategory, innerNumber, sectionName, sectionColor }) => {
+    if (mode === 'outer' && typeof outerIndex === 'number') {
+      const displayName = sectionName || CONFIG.outer.names[outerIndex] || `Círculo ${outerIndex + 1}`;
+      showBigMessageWithColor(`Círculo Seleccionado:\n${displayName}`, 4000, 'section-selected', sectionColor);
+      // Mostrar el anillo y sección seleccionados de forma fija
+      showTurnMessage(`🔴 Problemáticas: ${displayName}`);
+    } else if (mode === 'inner' && typeof innerNumber === 'number') {
+      const displayName = sectionName || `ODS ${innerNumber}`;
+      showBigMessageWithColor(`METAS 2030:\n${displayName}`, 4000, 'section-selected', sectionColor);
+      // Mostrar el anillo y sección seleccionados de forma fija
+      showTurnMessage(`🎯 Metas 2030: ${displayName}`);
+    }
+  });
+
+  socket.on('turn:play', () => {
+    state.phase = 'play';
+    setHandLocked(false);
+    
+    // El mensaje verde se mantiene fijo durante la fase de juego
+    // No se limpia aquí, solo cambia en nextTurn
+    
+    updateUIByPhase(state.players, state.currentTurn, 'play');
+  });
+
+  elements.bellButton?.addEventListener('click', () => {
+    socket.emit('game:endTurn');
+  });
+
+  elements.skipTurnBtn?.addEventListener('click', () => socket.emit('game:skipTurn'));
+  elements.drawCardBtn?.addEventListener('click', () => socket.emit('game:drawCard'));
+
+  socket.on('game:cardDrawn', ({ playerId, playerName }) => {
+    if (playerId === state.mySocketId) {
+      state.hasDrawn = true;
+      updateUIByPhase(state.players, state.currentTurn, state.phase);
+      showBigMessage('Robaste 1 carta', 1500);
+      showActionMessage('Robaste 1 carta');
+    } else {
+      showBigMessage(`${playerName} robó 1 carta`, 1200);
+      showActionMessage(`${playerName} robó 1 carta`);
+    }
+  });
+
+  socket.on('game:playerSkipped', ({ playerId, playerName }) => {
+    if (playerId === state.mySocketId) {
+      state.hasSkipped = true;
+      setHandLocked(true);
+      updateUIByPhase(state.players, state.currentTurn, state.phase);
+      showBigMessage('Has saltado tu turno', 1500);
+      showActionMessage('Has saltado tu turno');
+    } else {
+      showBigMessage(`${playerName} saltó su turno`, 1200);
+      showActionMessage(`${playerName} saltó su turno`);
+    }
+  });
+
+  socket.on('game:allSkipped', () => {
+    state.hasSkipped = false;
+    state.hasDrawn = false;
+    showBigMessage('Todos saltaron - Siguiente turno', 1800);
+    showActionMessage('Todos saltaron');
+  });
+
+  socket.on('game:nextTurn', () => {
+    const played = elements.playedArea.querySelectorAll('.card');
+    state.discardCount += played.length;
+
+    elements.playedArea.innerHTML = '';
+    elements.ring?.classList.remove('active', 'inactive');
+    elements.outer?.classList.remove('active', 'inactive');
+    elements.wheel.classList.add('locked');
+    elements.wheel.style.pointerEvents = 'none';
+
+    updateDiscardPileVisual();
+
+    state.hasSkipped = false;
+    state.hasDrawn = false;
+    
+    // Limpiar ambos mensajes para el nuevo turno
+    showTurnMessage('');
+    showActionMessage('');
+  });
+
+  socket.on('game:error', ({ msg }) => console.warn('[game:error]', msg));
+
+  socket.on('game:ended', ({ winner, reason }) => {
+    const text = reason === 'BASTA!'
+      ? `🎉 ¡BASTA!\n${winner} gana`
+      : reason === 'Ganador por abandono'
+      ? `🏆 ${winner}\nGanador por abandono`
+      : `🏁 ${reason || 'Partida terminada'}`;
+
+    showBigMessage(text, 5000);
+    elements.restartButton?.classList.add('show');
+
+    state.discardCount = 0;
+    updateDiscardPileVisual();
+  });
+
+  // Jugador abandonó la partida
+  socket.on('game:playerLeft', ({ playerName, playerId }) => {
+    showBigMessage(`${playerName} abandonó el tablero`, 3000);
+    showActionMessage(`${playerName} abandonó la partida`);
+  });
+
+  // Retorno al lobby después de abandonar
+  socket.on('game:returnToLobby', () => {
+    // Mostrar overlay de lobby para registrar nuevo juego
+    elements.lobbyOverlay?.classList.remove('hidden');
+    elements.restartButton?.classList.add('show');
+    if (elements.fullscreenTip) elements.fullscreenTip.classList.remove('hidden');
+    gameActive = false;
+    
+    // Limpiar estado del juego
+    state.myHand = [];
+    state.players = [];
+    state.currentTurn = 0;
+    state.phase = 'awaitRoll';
+    
+    // Ocultar botón de abandonar ya que no estamos en juego
+    if (elements.leaveGameBtn) elements.leaveGameBtn.style.display = 'none';
+    
+    showBigMessage('Has abandonado la partida', 2000);
+  });
+
+  elements.restartButton?.addEventListener('click', () => {
+    location.reload();
+  });
+
+  // Botón abandonar partida
+  elements.leaveGameBtn?.addEventListener('click', () => {
+    if (confirm('¿Estás seguro de que quieres abandonar la partida?')) {
+      socket.emit('game:leaveGame');
+    }
+  });
+
+  // ===== NUEVOS EVENTOS DEL SERVIDOR =====
+  
+  // Jugador se quedó sin cartas
+  socket.on('game:playerEmptyHand', ({ playerId, playerName, message }) => {
+    showBigMessage(message, 4000, 'warning');
+    showActionMessage(message);
+  });
+
+  // Victoria por ¡BASTA!
+  socket.on('game:bastaWin', ({ winner, message }) => {
+    showBigMessage(`🏆 ¡BASTA! 🏆\n${winner} ganó!`, 5000, 'basta-win');
+    showActionMessage(`${winner} ganó con ¡BASTA!`);
+  });
+
+  // Penalización por campana tardía
+  socket.on('game:bellPenalty', ({ penalizedPlayer, ringerPlayer, message }) => {
+    showBigMessage(message, 4000, 'penalty');
+    showActionMessage(`${ringerPlayer} tocó la campana - ${penalizedPlayer} penalizado`);
+  });
+
+  // Victoria fallida por carta inválida
+  socket.on('game:victoryFailed', ({ player, message }) => {
+    showBigMessage(`❌ Victoria Fallida ❌\n${message}`, 4000, 'penalty');
+    showActionMessage(message);
+  });
+
+  // Sección repetida en ruleta
+  socket.on('game:sectionRepeated', ({ message, sectionName }) => {
+    showBigMessage(`⚠️ ${message} ⚠️\n${sectionName}`, 3000, 'warning');
+    showActionMessage(`${message}: ${sectionName}`);
+  });
+
+  // ===== PANELES LATERALES =====
+
+  const panelToggles = [
+    { btn: elements.rulesToggle, panel: elements.rulesPanel, others: [elements.elementalPanel, elements.settingsPanel, elements.chatPanel, elements.voiceChatPanel] },
+    { btn: elements.elementalToggle, panel: elements.elementalPanel, others: [elements.rulesPanel, elements.settingsPanel, elements.chatPanel, elements.voiceChatPanel] },
+    { btn: elements.settingsToggle, panel: elements.settingsPanel, others: [elements.rulesPanel, elements.elementalPanel, elements.chatPanel, elements.voiceChatPanel] },
+    { btn: elements.settingsCornerBtn, panel: elements.settingsPanel, others: [elements.rulesPanel, elements.elementalPanel, elements.chatPanel, elements.voiceChatPanel] },
+    { btn: elements.chatToggle, panel: elements.chatPanel, others: [elements.rulesPanel, elements.elementalPanel, elements.settingsPanel, elements.voiceChatPanel] },
+    { btn: elements.voiceChatToggle, panel: elements.voiceChatPanel, others: [elements.rulesPanel, elements.elementalPanel, elements.settingsPanel, elements.chatPanel] }
+  ];
+
+  panelToggles.forEach(({ btn, panel, others }) => {
+    btn?.addEventListener('click', () => {
+      playSound(elements.panelSound);
+      others.forEach(p => p?.classList.remove('show'));
+      
+      const wasShowing = panel?.classList.contains('show');
+      panel?.classList.toggle('show');
+
+      // Manejar estado del mensaje Leeme basado en si hay paneles abiertos
+      updateLeemeMessage();
+
+      if (panel === elements.voiceChatPanel && panel.classList.contains('show')) {
+        loadAudioDevices();
+      }
+
+      if (panel === elements.chatPanel && panel.classList.contains('show')) {
+        elements.chatToggle?.classList.remove('has-unread');
+      }
+
+      // Si estamos en el lobby y se cierra un panel de chat, restaurar panel elemental
+      if (!gameActive && wasShowing && (panel === elements.chatPanel || panel === elements.voiceChatPanel)) {
+        setTimeout(() => {
+          autoShowElementalPanel();
+        }, 100);
+      }
+    });
+  });
+
+  [elements.closeRules, elements.closeElemental, elements.closeSettings,
+    elements.closeChat, elements.closeVoiceChat].forEach(btn => {
+    btn?.addEventListener('click', () => {
+      playSound(elements.panelSound);
+      document.querySelectorAll('.side-panel-left').forEach(p => p.classList.remove('show'));
+      if (btn === elements.closeChat) {
+        elements.chatToggle?.classList.remove('has-unread');
+      }
+      
+      // Si estamos en el lobby y se cierra un panel de chat, restaurar panel elemental
+      if (!gameActive && (btn === elements.closeChat || btn === elements.closeVoiceChat)) {
+        setTimeout(() => {
+          autoShowElementalPanel();
+        }, 100);
+      }
+    });
+  });
+
+  // ===== CHAT DE TEXTO =====
+
+  elements.chatSendBtn?.addEventListener('click', () => {
+    const msg = (elements.chatInput?.value || '').trim();
+    if (!msg) return;
+    socket.emit('chat:message', { text: msg });
+    elements.chatInput.value = '';
+  });
+
+  elements.chatInput?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') elements.chatSendBtn?.click();
+  });
+
+  socket.on('chat:message', ({ playerName, text }) => {
+    const msgEl = document.createElement('div');
+    msgEl.className = 'chat-msg';
+    msgEl.innerHTML = `<strong>${playerName}:</strong> ${text}`;
+    elements.chatMessages?.appendChild(msgEl);
+    elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+
+    if (!elements.chatPanel?.classList.contains('show')) {
+      playSound(elements.chatNotifySound);
+      elements.chatToggle?.classList.add('has-unread');
+    }
+  });
+
+  // ===== CHAT DE VOZ =====
+
+  async function loadAudioDevices() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+
+      elements.microphoneSelect.innerHTML = '<option value="">Seleccionar...</option>';
+      elements.speakerSelect.innerHTML = '<option value="">Predeterminado</option>';
+
+      devices.forEach(device => {
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        option.textContent = device.label || `${device.kind} (${device.deviceId.substring(0, 8)})`;
+
+        if (device.kind === 'audioinput') {
+          elements.microphoneSelect.appendChild(option);
+        } else if (device.kind === 'audiooutput') {
+          elements.speakerSelect.appendChild(option);
+        }
+      });
+
+      const savedMic = localStorage.getItem('basta_mic_id');
+      const savedSpeaker = localStorage.getItem('basta_speaker_id');
+
+      if (savedMic) {
+        elements.microphoneSelect.value = savedMic;
+        voiceState.selectedMicId = savedMic;
+      }
+      if (savedSpeaker) {
+        elements.speakerSelect.value = savedSpeaker;
+        voiceState.selectedSpeakerId = savedSpeaker;
+      }
+    } catch (err) {
+      console.error('Error al cargar dispositivos:', err);
+    }
+  }
+
+  elements.microphoneSelect?.addEventListener('change', async (e) => {
+    const deviceId = e.target.value;
+    voiceState.selectedMicId = deviceId;
+    try { localStorage.setItem('basta_mic_id', deviceId); } catch {}
+
+    if (voiceState.localStream) {
+      voiceState.localStream.getTracks().forEach(t => t.stop());
+      try {
+        const constraints = { audio: deviceId ? { deviceId: { exact: deviceId } } : true };
+        voiceState.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+        voiceState.localStream.getAudioTracks().forEach(t => t.enabled = voiceState.micEnabled);
+        await ensureMicProcessing();
+        applyVolumes();
+        elements.voiceStatus.textContent = 'Micrófono cambiado';
+      } catch (err) {
+        console.error('Error al cambiar micrófono:', err);
+        elements.voiceStatus.textContent = 'Error: ' + err.message;
+      }
+    }
+  });
+
+  elements.speakerSelect?.addEventListener('change', async (e) => {
+    const deviceId = e.target.value;
+    voiceState.selectedSpeakerId = deviceId;
+    try { localStorage.setItem('basta_speaker_id', deviceId); } catch {}
+
+    voiceState.remoteAudios.forEach(async (audio) => {
+      if (typeof audio.setSinkId === 'function') {
+        try {
+          await audio.setSinkId(deviceId || '');
+        } catch (err) {
+          console.error('Error al cambiar salida de audio:', err);
+        }
+      }
+    });
+  });
+
+  // Botón conectarse al chat de voz
+  elements.connectVoiceBtn?.addEventListener('click', async () => {
+    try {
+      console.log('🎙️ Iniciando conexión al chat de voz...');
+      const constraints = {
+        audio: voiceState.selectedMicId ? { deviceId: { exact: voiceState.selectedMicId } } : true
+      };
+      console.log('🎙️ Solicitando acceso al micrófono:', constraints);
+      
+      voiceState.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log('🎙️ Stream local obtenido:', voiceState.localStream.getTracks().map(t => ({ 
+        kind: t.kind, 
+        enabled: t.enabled, 
+        id: t.id 
+      })));
+      
+      // Activar micrófono automáticamente al conectarse
+      voiceState.localStream.getAudioTracks().forEach(t => t.enabled = true);
+      voiceState.micEnabled = true;
+      
+      // Actualizar UI del micrófono
+      elements.toggleMic.classList.remove('mic-off');
+      elements.toggleMic.classList.add('mic-on');
+      if (elements.micStatus) elements.micStatus.textContent = 'ON';
+      
+      console.log('🎙️ Micrófono activado automáticamente al conectarse');
+
+      await ensureMicProcessing();
+      applyVolumes();
+
+      elements.voiceStatus.textContent = 'Conectado';
+      elements.voiceConnectContainer.style.display = 'none';
+      elements.voiceControls.style.display = 'flex';
+
+      console.log('🎙️ Emitiendo voice:join al servidor');
+      socket.emit('voice:join');
+      await loadAudioDevices();
+    } catch (err) {
+      console.error('❌ Error al conectar al chat de voz:', err);
+      elements.voiceStatus.textContent = 'Error: ' + err.message;
+    }
+  });
+
+  // Botón desconectarse
+  elements.disconnectVoiceBtn?.addEventListener('click', () => {
+    if (voiceState.localStream) {
+      voiceState.localStream.getTracks().forEach(t => t.stop());
+      voiceState.localStream = null;
+    }
+
+    voiceState.peerConnections.forEach(pc => pc.close());
+    voiceState.peerConnections.clear();
+
+    voiceState.remoteAudios.forEach(audio => audio.remove());
+    voiceState.remoteAudios.clear();
+
+    voiceState.micEnabled = false;
+    elements.toggleMic.classList.remove('mic-on');
+    elements.toggleMic.classList.add('mic-off');
+    elements.micStatus.textContent = 'OFF';
+    elements.voiceStatus.textContent = 'Desconectado';
+    elements.voiceConnectContainer.style.display = 'block';
+    elements.voiceControls.style.display = 'none';
+  });
+
+  // Botón unirse a Discord
+  document.getElementById('joinDiscordBtn')?.addEventListener('click', () => {
+    // URL de invitación al servidor de Discord (puedes cambiar esta URL)
+    const discordInvite = 'https://discord.gg/yourinvitecode'; // Reemplaza con tu código de invitación
+    
+    // Intentar abrir en la aplicación de Discord primero, luego en navegador
+    const discordAppUrl = `discord://discord.gg/yourinvitecode`; // Reemplaza con tu código
+    
+    // Crear elemento temporal para intentar abrir la app
+    const tempLink = document.createElement('a');
+    tempLink.href = discordAppUrl;
+    tempLink.style.display = 'none';
+    document.body.appendChild(tempLink);
+    tempLink.click();
+    document.body.removeChild(tempLink);
+    
+    // Fallback: abrir en navegador después de un breve delay
+    setTimeout(() => {
+      window.open(discordInvite, '_blank');
+    }, 1000);
+    
+    // Mostrar mensaje confirmación
+    elements.voiceStatus.textContent = 'Abriendo Discord...';
+    setTimeout(() => {
+      if (elements.voiceStatus.textContent === 'Abriendo Discord...') {
+        elements.voiceStatus.textContent = 'Desconectado';
+      }
+    }, 3000);
+  });
+
+  // Modificar el toggleMic para solo encender/apagar
+  elements.toggleMic?.addEventListener('click', async () => {
+    if (!voiceState.localStream) {
+      elements.voiceStatus.textContent = 'Primero conéctate al chat de voz';
+      return;
+    }
+
+    voiceState.micEnabled = !voiceState.micEnabled;
+    console.log('🎙️ Toggling micrófono:', voiceState.micEnabled);
+    
+    const track = (voiceState.processedStream?.getAudioTracks?.()[0]) || voiceState.localStream.getAudioTracks()[0];
+    if (track) {
+      track.enabled = voiceState.micEnabled;
+      console.log('🎙️ Track habilitado:', track.enabled, 'ID:', track.id);
+    } else {
+      console.log('❌ No se encontró track de audio');
+    }
+
+    if (voiceState.micEnabled) {
+      elements.toggleMic.classList.remove('mic-off');
+      elements.toggleMic.classList.add('mic-on');
+      elements.micStatus.textContent = 'ON';
+      console.log('✅ Micrófono activado');
+    } else {
+      elements.toggleMic.classList.remove('mic-on');
+      elements.toggleMic.classList.add('mic-off');
+      elements.micStatus.textContent = 'OFF';
+      console.log('🔇 Micrófono desactivado');
+    }
+  });
+
+  elements.toggleSpeaker?.addEventListener('click', () => {
+    voiceState.speakerEnabled = !voiceState.speakerEnabled;
+
+    if (voiceState.speakerEnabled) {
+      elements.toggleSpeaker.classList.remove('speaker-off');
+      elements.toggleSpeaker.classList.add('speaker-on');
+      elements.speakerStatus.textContent = 'ON';
+    } else {
+      elements.toggleSpeaker.classList.remove('speaker-on');
+      elements.toggleSpeaker.classList.add('speaker-off');
+      elements.speakerStatus.textContent = 'OFF';
+    }
+
+    voiceState.remoteAudios.forEach(audio => {
+      audio.muted = !voiceState.speakerEnabled;
+    });
+  });
+
+  function updateDiscardPileVisual() {
+    const pile = document.getElementById('discardPile');
+    if (!pile) return;
+    const countEl = pile.querySelector('.pile-count');
+    if (countEl) countEl.textContent = String(state.discardCount);
+    if (state.discardCount > 0) {
+      pile.style.backgroundImage = "url('img/card-back.png')";
+    } else {
+      pile.style.backgroundImage = 'none';
+    }
+  }
+
+  // ===== Helpers de verificación y animación =====
+  function getCardElById(cardId) {
+    return elements.playedArea?.querySelector(`.card[data-card-id="${String(cardId)}"]`);
+  }
+
+  function cloneForAnimation(cardEl) {
+    const rect = cardEl.getBoundingClientRect();
+    const clone = cardEl.cloneNode(true);
+    clone.classList.add('floating-card');
+    clone.style.left = `${rect.left}px`;
+    clone.style.top = `${rect.top}px`;
+    clone.style.width = `${rect.width}px`;
+    clone.style.height = `${rect.height}px`;
+    document.body.appendChild(clone);
+    return { clone, rect };
+  }
+
+  function getCenter(rect) {
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  }
+
+  function animateToDiscard(cardEl) {
+    return new Promise(resolve => {
+      if (!elements.discardPile) return resolve();
+      const { clone, rect } = cloneForAnimation(cardEl);
+      const srcC = getCenter(rect);
+      const pileRect = elements.discardPile.getBoundingClientRect();
+      const dstC = getCenter(pileRect);
+
+      const dx = dstC.x - srcC.x;
+      const dy = dstC.y - srcC.y;
+
+      requestAnimationFrame(() => {
+        clone.style.transform = `translate(${dx}px, ${dy}px) scale(0.85)`;
+        clone.style.opacity = '0.95';
+      });
+
+      setTimeout(() => {
+        clone.style.opacity = '0';
+        setTimeout(() => {
+          clone.remove();
+          try { cardEl.remove(); } catch {}
+          state.discardCount += 1;
+          updateDiscardPileVisual();
+          resolve();
+        }, 180);
+      }, 450);
+    });
+  }
+
+  function animateShake(cardEl) {
+    return new Promise(resolve => {
+      cardEl.style.animation = 'shake 420ms ease-in-out';
+      setTimeout(() => { cardEl.style.animation = ''; resolve(); }, 430);
+    });
+  }
+
+  function findPlayerRowRect(playerId, playerName) {
+    const panel = document.getElementById('playersListPanel');
+    if (!panel) return null;
+    const rows = Array.from(panel.querySelectorAll('.player-item'));
+    let row = rows.find(r => r.querySelector('.player-name')?.textContent === playerName);
+    if (!row && playerId) row = rows.find(r => r.dataset?.playerId === playerId);
+    return row ? row.getBoundingClientRect() : null;
+  }
+
+  function animateReturnToPlayer(cardEl, playerId, playerName) {
+    return new Promise(resolve => {
+      const { clone, rect } = cloneForAnimation(cardEl);
+      const srcC = getCenter(rect);
+      const targetRect = findPlayerRowRect(playerId, playerName) || elements.cardDeck?.getBoundingClientRect();
+      if (!targetRect) {
+        clone.style.opacity = '0';
+        setTimeout(() => { clone.remove(); resolve(); }, 180);
+        try { cardEl.remove(); } catch {}
+        return;
+      }
+      const dstC = getCenter(targetRect);
+      const dx = dstC.x - srcC.x;
+      const dy = dstC.y - srcC.y;
+
+      requestAnimationFrame(() => {
+        clone.style.transform = `translate(${dx}px, ${dy}px) scale(0.8)`;
+        clone.style.opacity = '0.9';
+      });
+
+      setTimeout(() => {
+        clone.style.opacity = '0';
+        setTimeout(() => {
+          clone.remove();
+          try { cardEl.remove(); } catch {}
+          resolve();
+        }, 160);
+      }, 450);
+    });
+  }
+
+  async function createPeerConnection(userId) {
+    console.log('🔗 Creando peer connection para usuario:', userId);
+    
+    const pc = new RTCPeerConnection({
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun.stunprotocol.org:3478' },
+        { urls: 'stun:openrelay.metered.ca:80' },
+        // Servidores TURN públicos gratuitos para mejor conectividad a través de túneles
+        { 
+          urls: 'turn:openrelay.metered.ca:80',
+          username: 'openrelayproject',
+          credential: 'openrelayproject'
+        },
+        {
+          urls: 'turn:openrelay.metered.ca:443',
+          username: 'openrelayproject', 
+          credential: 'openrelayproject'
+        },
+        {
+          urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+          username: 'openrelayproject',
+          credential: 'openrelayproject'
+        }
+      ],
+      iceCandidatePoolSize: 10,
+      iceTransportPolicy: 'all'
+    });
+
+    // Logs de estado de conexión
+    pc.onconnectionstatechange = () => {
+      console.log(`🔗 Estado de conexión con ${userId}:`, pc.connectionState);
+    };
+    
+    pc.oniceconnectionstatechange = () => {
+      console.log(`🧊 Estado ICE con ${userId}:`, pc.iceConnectionState);
+    };
+
+    if (voiceState.localStream) {
+      const streamToSend = voiceState.processedStream || voiceState.localStream;
+      console.log('🎙️ Preparando stream para enviar a', userId);
+      console.log('🎙️ Stream a enviar:', streamToSend.getTracks().map(t => ({
+        kind: t.kind,
+        enabled: t.enabled,
+        id: t.id,
+        readyState: t.readyState
+      })));
+      
+      streamToSend.getTracks().forEach((track, index) => {
+        console.log(`🎙️ Agregando track ${index + 1}:`, track.kind, track.enabled ? 'ENABLED' : 'DISABLED');
+        const sender = pc.addTrack(track, streamToSend);
+        console.log('📡 Track agregado, sender:', !!sender);
+      });
+      
+      console.log('📊 Total tracks agregados:', streamToSend.getTracks().length);
+    } else {
+      console.log('⚠️ No hay stream local para agregar');
+    }
+
+    pc.ontrack = (event) => {
+      console.log('📻 Recibiendo track remoto de', userId, ':', event.track.kind);
+      const remoteStream = event.streams[0];
+      let audio = voiceState.remoteAudios.get(userId);
+      if (!audio) {
+        console.log('🔊 Creando elemento audio para', userId);
+        audio = document.createElement('audio');
+        audio.classList.add('remote-audio');
+        audio.autoplay = true;
+        audio.controls = false; // Sin controles visibles
+        audio.playsInline = true; // Para móviles
+        audio.muted = !voiceState.speakerEnabled;
+        audio.volume = clamp(state.volume.master, 0, 1) * clamp(state.volume.voice, 0, 1);
+        
+        // Eventos de debug para el audio
+        audio.addEventListener('loadedmetadata', () => {
+          console.log('📻 Metadata cargada para', userId);
+        });
+        
+        audio.addEventListener('canplay', () => {
+          console.log('🎵 Audio listo para reproducir de', userId);
+        });
+        
+        audio.addEventListener('playing', () => {
+          console.log('▶️ Audio reproduciéndose de', userId);
+        });
+        
+        audio.addEventListener('error', (e) => {
+          console.error('❌ Error en audio de', userId, ':', e.target.error);
+        });
+        if (voiceState.selectedSpeakerId && typeof audio.setSinkId === 'function') {
+          audio.setSinkId(voiceState.selectedSpeakerId).catch(() => {});
+        }
+        document.body.appendChild(audio);
+        voiceState.remoteAudios.set(userId, audio);
+        console.log('✅ Elemento audio creado y agregado al DOM para', userId);
+        console.log('🔊 Configuración del audio:', {
+          autoplay: audio.autoplay,
+          muted: audio.muted,
+          volume: audio.volume,
+          paused: audio.paused
+        });
+      }
+      audio.srcObject = remoteStream;
+      console.log('📻 Stream remoto asignado al elemento audio de', userId);
+      
+      // Forzar reproducción después de asignar el stream
+      audio.play().then(() => {
+        console.log('▶️ Audio iniciado correctamente para', userId);
+      }).catch(err => {
+        console.error('❌ Error al iniciar audio para', userId, ':', err);
+      });
+    };
+
+    pc.onicecandidate = (event) => {
+      if (event.candidate) socket.emit('voice:iceCandidate', { targetId: userId, candidate: event.candidate });
+    };
+
+    voiceState.peerConnections.set(userId, pc);
+    return pc;
+  }
+
+  async function startVoiceConnection(userId) {
+    try {
+      console.log('🔗 Iniciando conexión con usuario:', userId);
+      const pc = await createPeerConnection(userId);
+      console.log('🔗 Peer connection creado, creando oferta...');
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      console.log('🔗 Oferta creada y establecida localmente, enviando a:', userId);
+      socket.emit('voice:offer', { targetId: userId, offer: pc.localDescription });
+      console.log('✅ Oferta enviada exitosamente a:', userId);
+    } catch (err) {
+      console.error('❌ Error al iniciar conexión de voz:', err);
+    }
+  }
+
+  socket.on('voice:userJoined', async ({ userId }) => {
+    console.log('🎙️ Usuario se unió al chat de voz:', userId);
+    console.log('🎙️ Mi socket ID:', state.mySocketId);
+    console.log('🎙️ Tengo stream local:', !!voiceState.localStream);
+    
+    if (voiceState.localStream && userId !== state.mySocketId) {
+      // Usar comparación lexicográfica más simple y confiable
+      const shouldInitiate = state.mySocketId.localeCompare(userId) > 0;
+      console.log('🎙️ Comparación lexicográfica:', state.mySocketId, 'vs', userId, '→', shouldInitiate ? 'YO INICIO' : 'ESPERO');
+      
+      if (shouldInitiate) {
+        console.log('🎙️ Iniciando conexión de voz con:', userId);
+        await startVoiceConnection(userId);
+      } else {
+        console.log('🎙️ Esperando que el otro usuario inicie la conexión');
+        
+        // Timeout de respaldo: si no recibimos una oferta en 3 segundos, iniciamos nosotros
+        setTimeout(() => {
+          if (!voiceState.peerConnections.has(userId)) {
+            console.log('⏰ Timeout: iniciando conexión como respaldo con:', userId);
+            startVoiceConnection(userId);
+          }
+        }, 3000);
+      }
+    } else {
+      console.log('🎙️ No iniciando conexión - Stream:', !!voiceState.localStream, 'Es mismo usuario:', userId === state.mySocketId);
+    }
+  });
+
+  socket.on('voice:offer', async ({ fromId, offer }) => {
+    try {
+      console.log('📥 Recibida oferta de:', fromId);
+      const pc = await createPeerConnection(fromId);
+      console.log('🔗 Peer connection creado para responder oferta de:', fromId);
+      await pc.setRemoteDescription(new RTCSessionDescription(offer));
+      console.log('🔗 Descripción remota establecida, creando respuesta...');
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      console.log('🔗 Respuesta creada, enviando a:', fromId);
+
+      socket.emit('voice:answer', {
+        targetId: fromId,
+        answer: pc.localDescription
+      });
+      console.log('✅ Respuesta enviada exitosamente a:', fromId);
+    } catch (err) {
+      console.error('❌ Error al manejar oferta:', err);
+    }
+  });
+
+  socket.on('voice:answer', async ({ fromId, answer }) => {
+    try {
+      console.log('📥 Recibida respuesta de:', fromId);
+      const pc = voiceState.peerConnections.get(fromId);
+      if (pc) {
+        await pc.setRemoteDescription(new RTCSessionDescription(answer));
+        console.log('✅ Respuesta establecida exitosamente para:', fromId);
+      } else {
+        console.error('❌ No se encontró peer connection para:', fromId);
+      }
+    } catch (err) {
+      console.error('❌ Error al manejar respuesta:', err);
+    }
+  });
+
+  socket.on('voice:iceCandidate', async ({ fromId, candidate }) => {
+    try {
+      const pc = voiceState.peerConnections.get(fromId);
+      if (pc) {
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      }
+    } catch (err) {}
+  });
+
+  socket.on('voice:userLeft', ({ userId }) => {
+    const pc = voiceState.peerConnections.get(userId);
+    if (pc) {
+      pc.close();
+      voiceState.peerConnections.delete(userId);
+    }
+
+    const audio = voiceState.remoteAudios.get(userId);
+    if (audio) {
+      audio.remove();
+      voiceState.remoteAudios.delete(userId);
+    }
+  });
+
+  socket.on('voice:participants', ({ count, users }) => {
+    console.log('👥 Participantes de voz actualizados:', count, users);
+    elements.voiceParticipants.textContent = count;
+
+    if (elements.voiceUsersList) {
+      elements.voiceUsersList.innerHTML = '';
+      users.forEach(user => {
+        const userEl = document.createElement('div');
+        userEl.className = 'voice-user';
+        userEl.innerHTML = `🎤 ${user.name}`;
+        elements.voiceUsersList.appendChild(userEl);
+        console.log('👤 Usuario en chat de voz:', user.name, '(ID:', user.id, ')');
+      });
+    }
+  });
+
+  // ===== INICIALIZACIÓN =====
+
+  window.addEventListener('load', () => {
+    try {
+      const savedName = localStorage.getItem('basta_name');
+      if (savedName && elements.playerNameInput) {
+        elements.playerNameInput.value = savedName;
+      }
+    } catch {}
+
+    createInnerNumbers();
+    createOuterImages();
+
+    showDice(CONFIG.assets.dicePlaceholder);
+
+    state.discardCount = 0;
+    updateDiscardPileVisual();
+
+    setSlider(elements.masterVol, state.volume.master, elements.masterVolVal);
+    setSlider(elements.musicVol, state.volume.music, elements.musicVolVal);
+    setSlider(elements.fxVol, state.volume.fx, elements.fxVolVal);
+    setSlider(elements.voiceVol, state.volume.voice, elements.voiceVolVal);
+
+    bindSlider(elements.masterVol, 'master', elements.masterVolVal);
+    bindSlider(elements.musicVol, 'music', elements.musicVolVal);
+    bindSlider(elements.fxVol, 'fx', elements.fxVolVal);
+    bindSlider(elements.voiceVol, 'voice', elements.voiceVolVal);
+
+    applyVolumes();
+
+    // Verificar que los audios se cargaron correctamente
+    [elements.bellSound, elements.cardMoveSound, elements.chatNotifySound, elements.panelSound].forEach(audio => {
+      if (audio) {
+        audio.load();
+        console.log(`Audio ${audio.id} cargado:`, audio.currentSrc || 'Sin fuente');
+      }
+    });
+
+    // Sistema de apilamiento anterior restaurado
+
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        createInnerNumbers();
+        createOuterImages();
+        
+        // Recalcular espaciado de cartas apiladas cuando cambie el tamaño de ventana
+        if (elements.playerHand && elements.playerHand.classList.contains('stacked')) {
+          const totalCards = elements.playerHand.querySelectorAll('.card').length;
+          if (totalCards > 12) {
+            calculateCardSpacing(totalCards);
+          }
+        }
+      }, 150); // Debounce de 150ms para evitar múltiples ejecuciones
+    });
+    
+    // Inicializar estado del botón de música del lobby
+    if (elements.lobbyMusicToggle && elements.musicToggle) {
+      // Sincronizar estado inicial
+      updateMusicButtonsUI(state.musicPlaying);
+    }
+  });
+
+  // ====== Funciones auxiliares para AudioManager ======
+  function updateMusicButtonsUI(enabled) {
+    const buttons = [elements.lobbyMusicToggle, elements.musicToggle].filter(btn => btn);
+    
+    buttons.forEach(btn => {
+      if (enabled) {
+        btn.classList.add('playing');
+        btn.classList.remove('muted');
+      } else {
+        btn.classList.remove('playing');
+        btn.classList.add('muted');
+      }
+    });
+  }
+
+  // ====== Sistema de música independiente ======
+  // Iniciar música de lobby al unirse
+  socket.on('lobby:update', () => {
+    if (window.audioManager) {
+      setTimeout(() => {
+        // Solo cambiar si no estamos ya reproduciendo música de lobby
+        if (window.audioManager.music.mode !== 'lobby' || !window.audioManager.music.isPlaying) {
+          window.audioManager.startLobbyMusic();
+        }
+        updateMusicButtonsUI(window.audioManager.getStatus().soundEnabled);
+      }, 500); // Pequeño delay para evitar problemas de autoplay
+    }
+  });
+
+  // Cambiar a música de juego al iniciar partida
+  socket.on('game:start', () => {
+    if (window.audioManager) {
+      setTimeout(() => {
+        // Forzar cambio de contexto a juego, incluso si está en modo silencioso
+        console.log('🎮 Partida iniciada - Cambiando contexto musical a juego');
+        window.audioManager.forceGameMode();
+        
+        // Solo iniciar música si no está en modo silencioso
+        if (!window.audioManager.music.silentMode) {
+          window.audioManager.startGameMusic();
+        }
+        updateMusicButtonsUI(window.audioManager.getStatus().soundEnabled);
+      }, 1000); // Delay para permitir transición de UI
+    }
+  });
+
+  // Detener música al finalizar juego
+  socket.on('game:ended', () => {
+    if (window.audioManager) {
+      setTimeout(() => {
+        window.audioManager.forceStopMusic();
+        // Volver a música de lobby
+        window.audioManager.startLobbyMusic();
+      }, 3000); // Esperar un poco antes de parar la música
+    }
+  });
+
+  // ====== Inicialización de música al cargar ======
+  // Esperar a que el AudioManager esté disponible y luego inicializar UI
+  function initializeMusicUI() {
+    if (window.audioManager) {
+      console.log('🎵 Inicializando UI de música...');
+      // Activar música por defecto
+      const musicEnabled = true;
+      state.musicPlaying = musicEnabled;
+      updateMusicButtonsUI(musicEnabled);
+      console.log('🎵 UI de música inicializada - activa por defecto');
+    } else {
+      console.log('🎵 AudioManager no disponible aún, reintentando...');
+      setTimeout(initializeMusicUI, 500);
+    }
+  }
+  
+  // Inicializar música después de que todo esté cargado
+  setTimeout(initializeMusicUI, 100);
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+/* ===== CSS ESPECÍFICO PARA 4K 2560x1440 ===== */
+/* Carga automática via responsive-manager.js */
+
+/* RESOLUCIÓN 4K - TODO MÁS GRANDE */
+.game-area {
+  grid-template-columns: 200px 200px 1fr 100px 450px;
+  grid-template-rows: auto auto minmax(400px, auto);
+  padding: 40px 40px 20px 40px;
+  gap: 25px;
+}
+
+/* RULETA - Tamaño grande para 4K */
+.container { width: 890px; height: 890px; }
+.outer-ring { width: 870px; height: 870px; }
+.sections-wheel { width: 225px; height: 225px; }
+.ring-wheel { width: 355px; height: 355px; }
+.wheel { width: 130px; height: 130px; }
+
+/* CARTAS - Más grandes para 4K */
+.card { 
+  width: 180px; 
+  height: 230px; 
+  font-size: 18px; 
+  border-radius: 8px;
+}
+.player-hand .card { width: 200px; height: 280px; }
+.played-cards-container .card { width: 180px; height: 230px; }
+
+/* Colores pasteles para cartas 4K */
+.card[data-section="poverty"] { border-color: #E88888 !important; }
+.card[data-section="hunger"] { border-color: #E8BB88 !important; }
+.card[data-section="health"] { border-color: #BBE888 !important; }
+.card[data-section="education"] { border-color: #88E8BB !important; }
+.card[data-section="gender"] { border-color: #88E8E8 !important; }
+.card[data-section="environment"] { border-color: #88BBE8 !important; }
+.card[data-section="consumption"] { border-color: #BB88E8 !important; }
+.card[data-section="institutions"] { border-color: #E888BB !important; }
+
+/* Imágenes de cartas 4K - proporción 4:5 */
+.card .card-image {
+  display: block !important;
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  width: 164px; /* 180px - 16px padding */
+  height: 205px; /* 164px × 5/4 = 205px */
+  object-fit: contain;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+.player-hand .card .card-image {
+  width: 184px; /* 200px - 16px padding */
+  height: 230px; /* 184px × 5/4 = 230px */
+}
+
+/* Texto de cartas 4K con desenfoque reducido */
+.card-text { 
+  padding: 8px; 
+  line-height: 1.3; 
+  font-size: 16px;
+  backdrop-filter: blur(0.5px);
+  position: relative;
+  z-index: 3;
+}
+
+/* MENSAJES - Más visibles en 4K */
+#turnMessage { 
+top: 320px;
+  left: 20px;
+  font-size: 18px; 
+  padding: 16px 32px; 
+  border-radius: 12px;
+  max-width: 600px; /* Limitar ancho máximo para 4K */
+}
+
+#message { 
+    top: 380px;
+  left: 20px;
+  font-size: 14px; 
+  padding: 12px 24px; 
+}
+
+/* PANELES - Expandidos para 4K */
+.players-list-panel { 
+      position: fixed;
+  top: 430px;
+  left: 20px;
+  width: 250px; 
+  font-size: 16px;
+  padding: 20px;
+}
+.info-panel-left { 
+  width: 75px; 
+  font-size: 16px;
+}
+
+.side-panel-left {
+  position: fixed;
+  top: 0;
+  left: -700px;
+  width: 700px;
+  height: 100%;
+}
+
+.info-btn {
+  position: relative;
+  cursor: pointer;
+  padding: 20px 30px;
+  background: linear-gradient(135deg, #6802bb, #ca04ca);
+  border: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+/* LETRAS ANILLO INTERNO - Mucho más grandes para 4K */
+.ring-label { 
+  width: 120px; 
+  margin-left: -60px; 
+  text-align: center; 
+  color: #fff; 
+  font-size: 36px; 
+  font-weight: 900; 
+  z-index: 6; 
+  text-shadow: 0 2px 6px rgba(0,0,0,0.9); 
+  user-select: none;
+}
+
+/* RADIO AUMENTADO PARA CÍRCULO DE NÚMEROS EN 4K */
+/* Los números del anillo necesitan formar un círculo más grande para quedar */
+/* centrados en el grosor del anillo para pantallas 4K */
+
+.ring-labels { 
+    position: absolute;
+    width: 100px;
+    height: 100px; 
+}
+
+/* TEXTO - Más legible en 4K */
+.card-text { 
+  padding: 8px; 
+  line-height: 1.3; 
+  font-size: 16px;
+}
+
+/* CONTROLES - Más grandes para 4K */
+.controls button {
+  padding: 16px 24px;
+  font-size: 20px;
+  margin: 5px;
+}
+
+/* LOBBY - Expandido para 4K */
+.lobby-card {
+  max-width: 600px;
+  padding: 40px;
+}
+
+.lobby-card h1 { font-size: 48px; }
+.lobby-card input { 
+  padding: 12px; 
+  font-size: 18px; 
+  margin: 10px 0;
+}
+.lobby-card button { 
+  padding: 12px 24px; 
+  font-size: 16px; 
+}
+
+/* ELEMENTOS ESPECÍFICOS 4K */
+.bell-button { 
+  width: 140px; 
+  height: 80px; 
+  font-size: 40px; 
+}
+
+.music-toggle { 
+  width: 60px; 
+  height: 60px; 
+}
+
+.draw-button { 
+  padding: 10px 16px; 
+  font-size: 14px; 
+}
+
+/* RULETA - Detalles mejorados para 4K */
+.outer-label img {
+  width: 110px;
+  height: 110px;
+}
+
+.ring-label {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+/* MODO APILADO MEJORADO PARA 4K */
+.player-hand.stacked .card {
+  margin-right: -65px; /* Solapado proporcional para 4K */
+}
+
+.played-cards-container.stacked-vertical .card {
+  margin-bottom: -80px; /* Solapado vertical para 4K */
+}
+
+/* OCULTAR PANEL PLEGABLE - No necesario en 4K */
+.panel-toggle-btn {
+  display: none !important;
+}
+
+/* MENSAJE FIJO "LEEME" PARA 4K - SIEMPRE VISIBLE */
+.leeme-message {
+  position: absolute;
+  right: 100%; /* Al lado izquierdo del panel */
+  top: 15px; /* A la altura del primer botón */
+  transform: translateX(-15px);
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  animation: pulseLeeme 2s infinite ease-in-out;
+  z-index: 1002;
+  transition: transform 0.3s ease;
+  display: block;
+}
+
+/* Cuando hay hover en el panel, el mensaje Leeme se desplaza más a la izquierda */
+.info-panel-left:hover .leeme-message {
+  transform: translateX(-100px);
+}
+
+/* Ocultar cuando panel expandido */
+.info-panel-left.panel-expanded .leeme-message {
+  display: none;
+}
+
+/* Animación pulsante para el mensaje Leeme */
+@keyframes pulseLeeme {
+  0%, 100% {
+    opacity: 0.8;
+    transform: translateX(-15px) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-15px) scale(1.05);
+  }
+}
+
+
+
+/* ANIMACIONES MEJORADAS EN 4K */
+.card:hover {
+  transform: translateY(-10px) scale(1.05);
+}
+
+.bell-button:hover {
+  transform: scale(1.2);
+}
+
+/* SOMBRAS MEJORADAS EN 4K */
+.card {
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+}
+
+.container {
+  filter: drop-shadow(0 12px 24px rgba(0,0,0,0.4));
+}

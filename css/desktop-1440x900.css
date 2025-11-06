@@ -1,0 +1,256 @@
+/* ===== CSS ESPECÍFICO PARA DESKTOP 1440x900 ===== */
+/* Carga automática via responsive-manager.js */
+
+/* RESOLUCIÓN 16:10 MEDIUM - SIN SCROLL */
+.game-area {
+  grid-template-columns: 130px 130px 1fr 50px 300px;
+  grid-template-rows: auto auto minmax(240px, auto);
+  padding: 15px 15px 8px 15px;
+  gap: 10px;
+}
+
+/* RULETA - Tamaño compacto para pantalla mediana */
+.container { width: 560px; height: 560px; }
+.outer-ring { width: 560px; height: 560px; }
+.sections-wheel { width: 150px; height: 150px; }
+.ring-wheel { width: 235px; height: 235px; }
+.wheel { width: 100px; height: 100px; }
+
+/* CARTAS - Más pequeñas para espacio limitado */
+.card { 
+  width: 120px; 
+  height: 160px; 
+  font-size: 6px; 
+}
+.player-hand .card { width: 130px; height: 180px; }
+.played-cards-container .card { width: 120px; height: 160px; }
+
+/* Colores pasteles para cartas 1440x900 */
+.card[data-section="poverty"] { border-color: #E88888 !important; }
+.card[data-section="hunger"] { border-color: #E8BB88 !important; }
+.card[data-section="health"] { border-color: #BBE888 !important; }
+.card[data-section="education"] { border-color: #88E8BB !important; }
+.card[data-section="gender"] { border-color: #88E8E8 !important; }
+.card[data-section="environment"] { border-color: #88BBE8 !important; }
+.card[data-section="consumption"] { border-color: #BB88E8 !important; }
+.card[data-section="institutions"] { border-color: #E888BB !important; }
+
+/* Imágenes de cartas 1440x900 - proporción 4:5 */
+.card .card-image {
+  display: block !important;
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  width: 104px; /* 120px - 16px padding */
+  height: 130px; /* 104px × 5/4 = 130px */
+  object-fit: contain;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+.player-hand .card .card-image {
+  width: 114px; /* 130px - 16px padding */
+  height: 143px; /* 114px × 5/4 = 142.5px ≈ 143px */
+}
+
+/* PANELES - Reducidos para 1440px */
+.players-list-panel { 
+      position: fixed;
+  top: 325px;
+  left: 20px;
+  width: 250px; 
+  font-size: 16px;
+  padding: 20px;
+}
+
+.info-panel-left { 
+  width: 60px; 
+  font-size: 12px;
+}
+
+.info-btn {
+  position: relative;
+  cursor: pointer;
+  padding: 15px 25px;
+  background: linear-gradient(135deg, #6802bb, #ca04ca);
+  border: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+/* MAZO Y DESCARTADAS - Compactos */
+.deck-container { 
+  padding: 10px; 
+}
+.deck-container h3 { 
+  font-size: 13px; 
+  margin-bottom: 10px; 
+}
+.card-pile-container { 
+  padding: 10px; 
+}
+.card-pile-container h3 { 
+  font-size: 13px; 
+  margin-bottom: 10px; 
+}
+.card-deck, .card-pile {
+  width: 100px;
+  height: 140px;
+}
+.deck-count, .pile-count {
+  font-size: 11px;
+  padding: 5px 8px;
+}
+
+/* MENSAJE DINÁMICO - Compacto */
+#turnMessage { 
+top: 240px;
+  left: 20px;
+  font-size: 15px; 
+  padding: 8px 28px; 
+  border-radius: 12px;
+}
+
+#message { 
+    top: 285px;
+  left: 20px;
+  font-size: 12px; 
+  padding: 6px 24px; 
+}
+
+/* LETRAS ANILLO INTERNO - Compactas */
+.ring-label { 
+  width: 36px; 
+  margin-left: -18px; 
+  font-size: 18px; 
+  font-weight: 700;
+}
+
+/* CONTROLES - Compactos */
+.controls button {
+  padding: 12px 18px;
+  font-size: 13px;
+}
+
+/* TEXTO - Ajustado */
+.card-text { 
+  padding: 5px; 
+  line-height: 1.1;
+  backdrop-filter: blur(0.5px);
+  position: relative;
+  z-index: 3;
+}
+
+.side-panel-left {
+  position: fixed;
+  top: 0;
+  left: -550px;
+  width: 400px;
+  height: 100%;
+}
+
+/* ELEMENTOS ESPECÍFICOS */
+.bell-button { 
+  width: 80px; 
+  height: 55px; 
+  font-size: 26px; 
+}
+
+.player-hand {
+  max-height: none;
+  overflow: visible;
+}
+
+.played-cards-container {
+  max-height: none;
+  overflow: visible;
+}
+
+/* MODO APILADO - Mantener tamaño original para 1440x900 */
+.player-hand.stacked .card {
+  width: 130px !important; /* Mantener tamaño original de esta resolución */
+  height: 180px !important; /* Mantener tamaño original de esta resolución */
+  margin-left: -60px; /* Superposición para encimar sin reducir tamaño */
+}
+
+.player-hand.stacked .card:first-child {
+  margin-left: 0; /* Primera carta sin margen */
+}
+
+.player-hand.stacked .card:hover {
+  transform: translateY(-15px) scale(1.05) rotate(0deg) !important;
+  margin-left: -60px;
+  margin-right: 25px; /* Espacio extra al hacer hover */
+}
+
+/* Contador de cartas más pequeño */
+.player-hand.stacked::after {
+  font-size: 11px;
+  padding: 3px 6px;
+  top: 8px;
+  right: 10px;
+}
+
+/* Estado de transición de apilamiento - evitar pérdida de seguimiento */
+.player-hand.transitioning-stack .card {
+  pointer-events: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.player-hand.transitioning-stack .card:hover {
+  transform: none !important;
+}
+
+/* Cartas que se están removiendo - evitar interacciones */
+.card.card-removing {
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+/* OCULTAR PANEL PLEGABLE - No necesario en resolución alta */
+.panel-toggle-btn {
+  display: none !important;
+}
+
+/* MENSAJE FIJO "LEEME" PARA 1440x900 - SIEMPRE VISIBLE */
+.leeme-message {
+  position: absolute;
+  right: 100%; /* Al lado izquierdo del panel */
+  top: 10px; /* A la altura del primer botón */
+  transform: translateX(-10px);
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  animation: pulseLeeme 2s infinite ease-in-out;
+  z-index: 1002;
+  transition: transform 0.3s ease;
+  display: block;
+}
+
+/* Cuando hay hover en el panel, el mensaje Leeme se desplaza más a la izquierda */
+.info-panel-left:hover .leeme-message {
+  transform: translateX(-80px);
+}
+
+/* Ocultar cuando panel expandido */
+.info-panel-left.panel-expanded .leeme-message {
+  display: none;
+}
+
+/* Animación pulsante para el mensaje Leeme */
+@keyframes pulseLeeme {
+  0%, 100% {
+    opacity: 0.8;
+    transform: translateX(-10px) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-10px) scale(1.05);
+  }
+}
+

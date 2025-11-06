@@ -1,0 +1,2420 @@
+/* ===== Reset y base ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: Arial, sans-serif; background: #061223; color: #fff; }
+
+/* ===== Layout principal ===== */
+.game-area {
+  display: grid;
+  grid-template-areas:
+    "deck discard main info played"
+    ". . main info played"
+    "player player player player player";
+  grid-template-columns: 150px 150px 1fr 60px 360px; /* Aumentado de 280px a 360px para cartas jugadas */
+  grid-template-rows: auto auto minmax(280px, auto); /* Reducida de 320px a 280px */
+  gap: 15px; /* Reducido de 20px a 15px para compactar */
+  width: 100vw; height: 100vh; padding: 20px 20px 10px 20px; /* Padding inferior reducido */
+}
+
+/* ===== Descartadas (derecha del mazo) ===== */
+.card-pile-container { grid-area: discard; align-self: start; padding: 10px; }
+.card-pile-container h3 { color: #fff; font-size: 14px; margin-bottom: 10px; text-align: center; }
+.card-pile {
+  position: relative; width: 120px; height: 170px;
+  background: rgba(255,255,255,0.1); border-radius: 8px;
+  border: 2px dashed rgba(255,255,255,0.3);
+  display: flex; align-items: center; justify-content: center;
+  background-size: cover; background-position: center;
+}
+.pile-count { 
+  font-size: 48px; color: rgba(255,255,255,0.5); font-weight: bold;
+  position: absolute; bottom: -10px; right: -10px;
+  background: #111; border-radius: 16px; padding: 2px 8px; border: 2px solid #fff;
+}
+
+/* ===== Área central (ruleta) ===== */
+.main-game { grid-area: main; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+.container { position: relative; width: 560px; height: 560px; }
+
+.outer-ring, .sections-wheel, .ring-wheel, .wheel {
+  position: absolute; 
+  top: 50%;
+  left: 50%; 
+  transform: translate(-50%, -50%);
+}
+
+/* Anillo exterior */
+.outer-ring {
+  --outer-sectors: 8; --outer-sep-deg: 0.6deg; --outer-sector-deg: calc(360deg / var(--outer-sectors)); --outer-hole: 28%;
+  width: 600px; height: 600px; border-radius: 50%;
+background: conic-gradient(
+  hsl(0, 60%, 80%) 0deg 45deg,      /* rojo pastel */
+  hsl(45, 60%, 80%) 45deg 90deg,    /* amarillo pastel */
+  hsl(90, 60%, 80%) 90deg 135deg,   /* verde lima pastel */
+  hsl(135, 60%, 80%) 135deg 180deg, /* verde menta pastel */
+  hsl(180, 60%, 80%) 180deg 225deg, /* cian pastel */
+  hsl(225, 60%, 80%) 225deg 270deg, /* azul pastel */
+  hsl(270, 60%, 80%) 270deg 315deg, /* violeta pastel */
+  hsl(315, 60%, 80%) 315deg 360deg  /* rosa pastel */
+);
+  -webkit-mask: radial-gradient(circle, transparent var(--outer-hole), black calc(var(--outer-hole) + 1%));
+  mask: radial-gradient(circle, transparent var(--outer-hole), black calc(var(--outer-hole) + 1%));
+  z-index: 0; pointer-events: none; transition: all 0.5s ease;
+}
+.outer-ring::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: repeating-conic-gradient(#fff 0 var(--outer-sep-deg), transparent var(--outer-sep-deg) var(--outer-sector-deg));
+  -webkit-mask: radial-gradient(circle, transparent var(--outer-hole), black calc(var(--outer-hole) + 1%));
+  mask: radial-gradient(circle, transparent var(--outer-hole), black calc(var(--outer-hole) + 1%));
+  z-index: 1; pointer-events: none;
+}
+.outer-ring::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 3px #fff inset; z-index: 2; pointer-events: none; }
+
+.sections-wheel { 
+  width: 160px; height: 160px; border-radius: 50%; 
+  background: radial-gradient(circle, #f8f9fa 0%, #f8f9fa 55%, #1a1a1a 56%, #1a1a1a 100%);
+  z-index: 1; pointer-events: none; 
+  color: white;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+/* Anillo interior */
+.ring-wheel {
+  --ring-sectors: 17; --ring-sep-deg: 0.6deg; --ring-sector-deg: calc(360deg / var(--ring-sectors));
+  width: 243px; height: 243px; border-radius: 50%;
+background: conic-gradient(
+  hsl(0,70%,25%) 0deg 21.17647deg, hsl(21.17647,70%,25%) 21.17647deg 42.35294deg,
+  hsl(42.35294,70%,25%) 42.35294deg 63.52941deg, hsl(63.52941,70%,25%) 63.52941deg 84.70588deg,
+  hsl(84.70588,70%,25%) 84.70588deg 105.88235deg, hsl(105.88235,70%,25%) 105.88235deg 127.05882deg,
+  hsl(127.05882,70%,25%) 127.05882deg 148.23529deg, hsl(148.23529,70%,25%) 148.23529deg 169.41176deg,
+  hsl(169.41176,70%,25%) 169.41176deg 190.58824deg, hsl(190.58824,70%,25%) 190.58824deg 211.76471deg,
+  hsl(211.76471,70%,25%) 211.76471deg 232.94118deg, hsl(232.94118,70%,25%) 232.94118deg 254.11765deg,
+  hsl(254.11765,70%,25%) 254.11765deg 275.29412deg, hsl(275.29412,70%,25%) 275.29412deg 296.47059deg,
+  hsl(296.47059,70%,25%) 296.47059deg 317.64706deg, hsl(317.64706,70%,25%) 317.64706deg 338.82353deg,
+  hsl(338.82353,70%,25%) 338.82353deg 360deg
+);
+  -webkit-mask: radial-gradient(circle, transparent 35%, black 36%);
+  mask: radial-gradient(circle, transparent 35%, black 36%);
+  z-index: 2; pointer-events: none; transition: all 0.5s ease;
+}
+.ring-wheel::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: repeating-conic-gradient(rgba(255,255,255,0.9) 0 var(--ring-sep-deg), transparent var(--ring-sep-deg) var(--ring-sector-deg));
+  -webkit-mask: radial-gradient(circle, transparent 35%, black 36%); mask: radial-gradient(circle, transparent 35%, black 36%);
+  z-index: 3; pointer-events: none;
+}
+.ring-wheel::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 3px #fff inset; z-index: 4; pointer-events: none; }
+
+/* Flecha/rueda */
+.wheel {
+  width: 100px; height: 100px;
+  transform: translate(-50%, -50%) rotate(0deg); transform-origin: center center;
+  transition: transform 4s cubic-bezier(.1,.9,.2,1);
+  z-index: 3; cursor: pointer; pointer-events: auto;
+}
+.wheel.locked { pointer-events: none; cursor: default; opacity: 0.95; }
+#conf {
+  width: 100%; height: 100%;
+  background-image: url('img/flecha.png');
+  background-position: center; background-repeat: no-repeat; background-size: contain;
+  pointer-events: none;
+}
+
+.outer-highlight, .ring-highlight { position: absolute; inset: 0; border-radius: 50%; pointer-events: none; z-index: 5; display: none; }
+.ring-highlight { -webkit-mask: radial-gradient(circle, transparent 35%, black 36%); mask: radial-gradient(circle, transparent 35%, black 36%); }
+.outer-highlight { -webkit-mask: radial-gradient(circle, transparent var(--outer-hole,28%), black calc(var(--outer-hole,28%) + 1%)); mask: radial-gradient(circle, transparent var(--outer-hole,28%), black calc(var(--outer-hole,28%) + 1%)); }
+.ring-wheel.inactive, .outer-ring.inactive { opacity: 0.6; filter: grayscale(30%) brightness(90%); }
+.ring-wheel.active, .outer-ring.active { opacity: 1; filter: brightness(120%) saturate(110%); box-shadow: 0 0 30px rgba(255,255,255,0.3); }
+
+.outer-labels, .ring-labels { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
+.outer-label, .ring-label { position: absolute; left: 50%; top: 46%; transform-origin: 0 0; pointer-events: none; }
+.ring-label { width: 40px; margin-left: -20px; text-align: center; color: #fff; font-size: 18px; font-weight: 700; z-index: 6; text-shadow: 0 1px 3px rgba(0,0,0,0.8); user-select: none; }
+
+.outer-label { 
+  width: 120px; height: 120px; 
+  margin-left: -60px; margin-top: -60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.outer-label img { 
+  width: 100%; height: 100%; 
+  object-fit: cover; 
+  display: block; 
+  border-radius: 15px; 
+  border: 3px solid rgba(255,255,255,0.9);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+  opacity: 0.9;
+}
+
+/* ===== Controles ===== */
+.controls { display: flex; gap: 15px; align-items: center; justify-content: center; padding: 10px; flex-wrap: wrap; }
+.controls button {
+  padding: 12px 24px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer;
+  background: linear-gradient(145deg, #4CAF50, #45a049); color: white; transition: all 0.3s ease; box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+.controls button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.4); }
+.controls button:disabled { background: #666; cursor: not-allowed; opacity: 0.5; }
+.controls img { filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+
+/* ===== Controles de Audio ===== */
+.music-toggle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+  border: 3px solid #fff;
+  cursor: pointer;
+  font-size: 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: musicPulse 3s ease-in-out infinite;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.music-toggle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+}
+
+.music-toggle:hover {
+  transform: scale(1.15) rotate(15deg);
+  box-shadow: 
+    0 8px 20px rgba(139, 92, 246, 0.6),
+    0 0 30px rgba(139, 92, 246, 0.4);
+  background: linear-gradient(145deg, #9d65f7, #8b5cf6);
+}
+
+.music-toggle:hover::before {
+  width: 120%;
+  height: 120%;
+}
+
+.music-toggle:active {
+  transform: scale(0.95) rotate(5deg);
+  animation-play-state: paused;
+}
+
+@keyframes musicPulse {
+  0%, 100% { 
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+    background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+  }
+  50% { 
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.6);
+    background: linear-gradient(145deg, #9d65f7, #8b5cf6);
+  }
+}
+
+.music-toggle.playing {
+  background: linear-gradient(145deg, #10b981, #059669);
+  animation: music-pulse 2s infinite;
+}
+
+.music-toggle.muted {
+  background: linear-gradient(145deg, #6b7280, #4b5563);
+  opacity: 0.7;
+}
+
+@keyframes music-pulse {
+  0%, 100% { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); }
+  50% { box-shadow: 0 6px 20px rgba(16, 185, 129, 0.8); }
+}
+
+/* Music toggle dentro del info-panel-left */
+.info-panel-left .music-toggle {
+  margin: 5px 0;
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+  border: 3px solid #fff;
+  cursor: pointer;
+  font-size: 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: musicPulse 3s ease-in-out infinite;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.info-panel-left .music-toggle:hover {
+  transform: scale(1.1);
+}
+
+.info-panel-left .music-toggle.playing {
+  animation: music-pulse 2s infinite;
+}
+
+/* ===== Botón de configuración en esquina superior derecha ===== */
+.settings-corner-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  border: 2px solid #fff;
+  cursor: pointer;
+  font-size: 24px;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.settings-corner-btn:hover {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.5);
+}
+
+/* Ocultar elementos de audio */
+#bgMusic, #bellSound, #cardMoveSound, #chatNotifySound, #panelSound {
+  display: none;
+}
+
+/* Mensaje tipo 1: Anillo y sección activos del turno */
+#turnMessage { 
+  top: 275px;
+  left: 20px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  color: #34d399;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.7);
+  position: absolute;
+  z-index: 6;
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  border-radius: 6px;
+  padding: 6px 12px;
+  min-height: 16px;
+  max-width: 500px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mensaje tipo 2: Acciones de jugadores */
+#message { 
+  top: 315px;
+  left: 20px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  color: #fbbf24;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  position: absolute;
+  z-index: 5;
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  border-radius: 6px;
+  padding: 4px 10px;
+  min-height: 14px;
+}
+
+/* ===== Paneles de información ===== */
+.info-panel-left { 
+  grid-area: info;
+  display: flex; 
+  flex-direction: column; 
+  gap: 8px; 
+  z-index: 20;
+  align-self: start;
+  padding-top: 10px;
+  animation: panelFloatIn 1s ease-out;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.info-panel-left:hover {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+}
+
+/* MENSAJE FIJO "LEEME" PARA 1920x1080 BASE - SIEMPRE VISIBLE */
+.leeme-message {
+  content: '← Leeme';
+  position: absolute;
+  right: 100%; /* Al lado izquierdo del panel */
+  top: 10px; /* A la altura del primer botón */
+  transform: translateX(-10px);
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  animation: pulseLeeme 2s infinite ease-in-out;
+  z-index: 1002;
+  transition: transform 0.3s ease;
+  display: block;
+}
+
+/* Cuando hay hover en el panel, el mensaje Leeme se desplaza más a la izquierda */
+.info-panel-left:hover .leeme-message {
+  transform: translateX(-80px);
+}
+
+/* Ocultar cuando panel expandido */
+.info-panel-left.panel-expanded .leeme-message {
+  display: none;
+}
+
+
+
+/* Animación pulsante para el mensaje Leeme */
+@keyframes pulseLeeme {
+  0%, 100% {
+    opacity: 0.8;
+    transform: translateX(-10px) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-10px) scale(1.05);
+  }
+}
+
+@keyframes panelFloatIn {
+  0% { 
+    opacity: 0; 
+    transform: translateX(-30px) scale(0.95);
+  }
+  60% { 
+    opacity: 0.8; 
+    transform: translateX(5px) scale(1.02);
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateX(0) scale(1);
+  }
+}
+.info-toggle { 
+  padding: 10px 12px; 
+  border-radius: 50%;
+  border: 2px solid #fff; 
+  background: linear-gradient(135deg, #6b7280, #4b5563); 
+  color: white; 
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 20px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: buttonPulse 4s ease-in-out infinite;
+}
+
+.info-toggle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  transform: translate(-50%, -50%);
+}
+
+.info-toggle:hover { 
+  background: linear-gradient(135deg, #7c3aed, #6d28d9); 
+  transform: scale(1.1) rotate(15deg); 
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.5);
+}
+
+.info-toggle:hover::before {
+  width: 120%;
+  height: 120%;
+}
+
+.info-toggle:active {
+  transform: scale(0.95) rotate(5deg);
+  animation-play-state: paused;
+}
+
+@keyframes buttonPulse {
+  0%, 100% { 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+  }
+  50% { 
+    box-shadow: 0 6px 16px rgba(107, 114, 128, 0.5);
+    background: linear-gradient(135deg, #7c7d8a, #5b6370);
+  }
+}
+
+.side-panel-left {
+  position: fixed;
+  top: 0;
+  left: -550px;
+  width: 540px;
+  height: 100%;
+  background: rgba(45, 55, 72, 0.75);
+  backdrop-filter: blur(15px);
+  color: #f7fafc;
+  border-right: 2px solid rgba(113, 128, 150, 0.4);
+  z-index: 15000;
+  transition: left 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow-y: auto;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+}
+.side-panel-left.show { left: 0; }
+.panel-header { 
+  display:flex; 
+  align-items:center; 
+  justify-content:space-between; 
+  padding: 10px 12px; 
+  background:#1a1a1a; 
+  position: sticky; 
+  top: 0; 
+  z-index: 10; 
+}
+.close-panel {
+  background: transparent;
+  border: none;
+  color: #eee;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: all 0.2s ease;
+}
+.close-panel:hover { color: #ff5555; transform: scale(1.1); }
+.panel-content { 
+  padding: 12px; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px; 
+  align-items: stretch;
+  justify-content: flex-start;
+  flex-grow: 1;
+}
+.panel-content ol { padding-left: 20px; }
+.panel-content li { margin-bottom: 8px; line-height: 1.4; }
+
+/* ===== Chat ===== */
+.chat-body {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 50px);
+}
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  background: #0a0a0a;
+}
+.chat-msg {
+  margin-bottom: 8px;
+  padding: 6px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+  font-size: 14px;
+}
+.chat-msg strong {
+  color: #7dd3fc;
+}
+.chat-input-container {
+  display: flex;
+  gap: 6px;
+  padding: 10px;
+  border-top: 1px solid #333;
+  background: #111;
+}
+.chat-input-container input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: #0a0a0a;
+  color: #fff;
+  outline: none;
+}
+.chat-input-container button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid #333;
+  background: #1f2937;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+}
+.chat-input-container button:hover {
+  filter: brightness(1.1);
+}
+
+/* ===== Cartas jugadas (derecha) ===== */
+.played-area { 
+  grid-area: played; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 10px; 
+  padding: 10px; 
+  background: rgba(255,255,255,0.05); 
+  border-radius: 10px; 
+  overflow-y: auto; 
+  position: relative; 
+}
+.played-area h3 { color: #fff; font-size: 16px; margin: 0 0 10px 0; text-align: center; }
+
+/* Modo normal: 2 columnas hasta 2 filas */
+.played-cards-container { 
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px; /* Reducido de 10px a 8px para mejor aprovechamiento */
+  align-items: start;
+  max-height: 100%;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+/* Modo apilado vertical: cuando hay más de 2 filas */
+.played-cards-container.stacked-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 5px; /* Menor espacio entre cartas apiladas */
+  align-items: center;
+  overflow-y: auto;
+}
+
+.played-cards-container.stacked-vertical .card {
+  width: 80px !important; /* Cartas más pequeñas en modo apilado */
+  height: 110px !important;
+  margin-bottom: -15px; /* Superponer verticalmente */
+  transform: scale(0.8); /* Escalar para ahorrar espacio */
+  transition: all 0.3s ease;
+}
+
+.played-cards-container.stacked-vertical .card:hover {
+  transform: scale(0.9) translateY(-5px); /* Efecto hover reducido */
+  z-index: 10;
+}
+
+.played-cards-container.stacked-vertical .card:last-child {
+  margin-bottom: 0; /* Última carta sin margen inferior */
+}
+
+/* ===== Mano del jugador ===== */
+.player-hand {
+  grid-area: player; background: rgba(255,255,255,0.1); border-radius: 10px; padding: 18px;
+  display: flex; flex-direction: row; justify-content: flex-start; align-items: center;
+  min-height: 280px; /* Reducida de 300px a 280px */
+  max-height: 350px; /* Altura máxima para control */
+  overflow-x: auto; overflow-y: hidden; transition: all 0.3s ease;
+  position: relative;
+  margin-top: -10px; /* Mover hacia arriba */
+}
+
+/* Modo normal: cartas separadas */
+.player-hand:not(.stacked) {
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+/* Modo apilado: cartas superpuestas */
+.player-hand.stacked {
+  gap: 0;
+  justify-content: space-between;
+}
+
+.player-hand.stacked .card {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+.player-hand.stacked .card:hover {
+  transform: translateY(-15px) scale(1.05) rotate(0deg);
+  z-index: 100;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.6);
+}
+
+.player-hand.stacked .card:nth-child(odd) {
+  transform: rotate(-0.5deg);
+}
+
+.player-hand.stacked .card:nth-child(even) {
+  transform: rotate(0.5deg);
+}
+
+.player-hand.stacked .card:hover {
+  transform: translateY(-15px) scale(1.05) rotate(0deg) !important;
+}
+
+.player-hand.stacked::after {
+  content: attr(data-card-count) ' cartas';
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 200;
+}
+
+/* Estado de transición de apilamiento - evitar pérdida de seguimiento */
+.player-hand.transitioning-stack .card {
+  pointer-events: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.player-hand.transitioning-stack .card:hover {
+  transform: none !important;
+}
+
+/* Cartas que se están removiendo - evitar interacciones */
+.card.card-removing {
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+.player-hand:not(.stacked) {
+  gap: 15px;
+  overflow-x: auto; 
+  overflow-y: hidden;
+  scrollbar-width: thin; 
+  scrollbar-color: rgba(255,255,255,0.3) rgba(255,255,255,0.1);
+  align-items: center;
+  justify-content: flex-start;
+}
+.player-hand.locked { opacity: 0.5; pointer-events: none; filter: grayscale(50%); }
+
+/* ===== Cartas ===== */
+.card {
+  width: 150px; height: 220px; background: white; border-radius: 12px; padding: 8px;
+  display: flex; flex-direction: column; position: relative; cursor: pointer; transition: all 0.3s ease; 
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3); flex-shrink: 0; overflow: hidden;
+  background: white;
+  align-self: self-start;
+}
+
+.card .card-image {
+  display: block !important;
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  width: 134px;
+  height: 168px;
+  object-fit: contain;
+  z-index: 1;
+  opacity: 0.9;
+}
+.card.dealt { animation: dealCard 0.5s ease-out; }
+.card.card-playing {
+  opacity: 0.7 !important;
+  pointer-events: none !important;
+  transform: scale(0.95) !important;
+  filter: grayscale(30%) !important;
+  transition: all 0.3s ease !important;
+}
+.player-hand:not(.stacked) .card:hover:not(.card-playing) { 
+  transform: translateY(-15px); 
+  box-shadow: 0 8px 16px rgba(0,0,0,0.5); 
+  z-index: 10; 
+}
+.card img { display: none; }
+
+/* Cartas en área de cartas jugadas - tamaño optimizado */
+.played-cards-container .card {
+  width: 140px; /* Ligeramente más pequeñas para mejor ajuste */
+  height: 200px;
+}
+
+/* Mejoras visuales para colores de sección */
+.card {
+  border-radius: 12px !important;
+}
+
+/* Colores específicos para cada sección (mejora visual) - versión pastel */
+.card[data-section="poverty"] { border-color: #E88888 !important; }
+.card[data-section="hunger"] { border-color: #E8BB88 !important; }
+.card[data-section="health"] { border-color: #BBE888 !important; }
+.card[data-section="education"] { border-color: #88E8BB !important; }
+.card[data-section="gender"] { border-color: #88E8E8 !important; }
+.card[data-section="environment"] { border-color: #88BBE8 !important; }
+.card[data-section="consumption"] { border-color: #BB88E8 !important; }
+.card[data-section="institutions"] { border-color: #E888BB !important; }
+
+.card-text { 
+  font-size: 11px; color: white; text-align: center; line-height: 1.3; font-weight: 800;
+  white-space: pre-line;
+  overflow: hidden; 
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  hyphens: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.6);
+  background: transparent;
+  border-radius: 8px;
+  backdrop-filter: blur(0.5px);
+  margin-bottom: auto;
+  min-height: 60px;
+  max-height: 95px;
+  position: relative;
+  z-index: 3;
+}
+
+/* ===== Cartas comodín ===== */
+.card.wildcard {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%) !important;
+  border: 3px solid #FF6347 !important;
+  border-left: 6px solid #FF6347 !important;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 4px 8px rgba(0,0,0,0.3) !important;
+  animation: wildcardGlow 2s ease-in-out infinite alternate;
+}
+.card.wildcard .card-text {
+  color: #8B4513 !important;
+  font-weight: 800 !important;
+  text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+}
+.card.wildcard:hover {
+  transform: translateY(-15px) scale(1.05);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 8px 16px rgba(0,0,0,0.5) !important;
+}
+@keyframes wildcardGlow {
+  0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 4px 8px rgba(0,0,0,0.3); }
+  100% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.9), 0 4px 8px rgba(0,0,0,0.3); }
+}
+
+/* ===== CSS de letras iniciales eliminado - diseño restaurado ===== */
+
+/* ===== Botón campana ===== */
+.bell-button {
+  width: auto; height: 50px; padding: 0 20px; border-radius: 25px;
+  background: linear-gradient(145deg, #ffd700, #ffed4e); border: 3px solid #fff; cursor: pointer; font-size: 18px;
+  font-weight: bold; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(255,215,0,0.4); 
+  display: flex; align-items: center; justify-content: center; margin: 0 10px;
+}
+.bell-button:hover:not(:disabled) { transform: scale(1.15) rotate(20deg); box-shadow: 0 8px 25px rgba(255,215,0,0.8); }
+.bell-button:active:not(:disabled) { transform: scale(1.05) rotate(-10deg); }
+.bell-button:disabled { opacity: 0.3; pointer-events: none; background: #999; filter: grayscale(100%); }
+
+/* ===== Mensajes y animaciones ===== */
+.big-message {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.75); color: #fff; padding: 10px 16px; border-radius: 8px; z-index: 2000;
+  opacity: 0; animation: fadeInOut 2200ms ease-in-out forwards;
+}
+.big-message.basta {
+  top: 50%; 
+  left: 50%;
+  transform: translate(-50%, -50%); 
+  font-size: 48px; 
+  font-weight: 900;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  padding: 20px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  text-align: center;
+  animation: bastaAnimation 0.6s ease-out forwards;
+  z-index: 3000;
+}
+.big-message.section-selected {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.9), rgba(33, 150, 243, 0.9));
+  color: #fff;
+  padding: 30px 40px;
+  border-radius: 15px;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.7);
+  text-align: center;
+  border: 3px solid #FFD700;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  white-space: pre-line;
+  max-width: 80vw;
+  animation: sectionAnimation 0.8s ease-out forwards;
+  z-index: 3000;
+}
+@keyframes dealCard {
+  from { transform: translateY(-100vh) rotate(-15deg); opacity: 0; }
+  to { transform: translateY(0) rotate(0); opacity: 1; }
+}
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translate(-50%, -20px); }
+  15% { opacity: 1; transform: translate(-50%, 0); }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -20px); }
+}
+@keyframes bastaAnimation {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5) rotate(-10deg); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(5deg); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+}
+/* Nuevos estilos para mensajes especiales */
+.big-message.basta-win {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 56px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #000;
+  padding: 40px 60px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(255, 215, 0, 0.5);
+  text-align: center;
+  border: 5px solid #FFD700;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  white-space: pre-line;
+  animation: bastaWinAnimation 1s ease-out forwards;
+  z-index: 3500;
+}
+
+.big-message.warning {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.95), rgba(255, 87, 34, 0.95));
+  color: #fff;
+  padding: 25px 35px;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(255, 87, 34, 0.4);
+  text-align: center;
+  border: 3px solid #FF6B35;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+  white-space: pre-line;
+  animation: warningAnimation 0.6s ease-out forwards;
+  z-index: 3200;
+}
+
+.big-message.penalty {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.95), rgba(156, 39, 176, 0.95));
+  color: #fff;
+  padding: 20px 30px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(244, 67, 54, 0.4);
+  text-align: center;
+  border: 3px solid #F44336;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+  white-space: pre-line;
+  animation: penaltyAnimation 0.7s ease-out forwards;
+  z-index: 3100;
+}
+
+@keyframes bastaWinAnimation {
+  0% { 
+    opacity: 0; 
+    transform: translate(-50%, -50%) scale(0.2) rotate(-15deg); 
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+  }
+  50% { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1.3) rotate(5deg); 
+    box-shadow: 0 25px 70px rgba(255, 215, 0, 0.6);
+  }
+  100% { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1) rotate(0deg); 
+    box-shadow: 0 20px 60px rgba(255, 215, 0, 0.5);
+  }
+}
+
+@keyframes warningAnimation {
+  0% { 
+    opacity: 0; 
+    transform: translate(-50%, -50%) scale(0.5) rotateX(90deg); 
+    box-shadow: 0 5px 15px rgba(255, 87, 34, 0.2);
+  }
+  70% { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1.1) rotateX(-5deg); 
+    box-shadow: 0 15px 45px rgba(255, 87, 34, 0.5);
+  }
+  100% { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1) rotateX(0deg); 
+    box-shadow: 0 12px 40px rgba(255, 87, 34, 0.4);
+  }
+}
+
+@keyframes penaltyAnimation {
+  0% { 
+    opacity: 0; 
+    transform: translate(-50%, -50%) scale(0.3) rotateZ(-20deg); 
+    box-shadow: 0 3px 10px rgba(244, 67, 54, 0.2);
+  }
+  60% { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1.15) rotateZ(3deg); 
+    box-shadow: 0 12px 35px rgba(244, 67, 54, 0.5);
+  }
+  100% { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1) rotateZ(0deg); 
+    box-shadow: 0 10px 30px rgba(244, 67, 54, 0.4);
+  }
+}
+
+@keyframes sectionAnimation {
+  0% { 
+    opacity: 0; 
+    transform: translate(-50%, -50%) scale(0.3) rotateY(180deg); 
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+  }
+  30% { 
+    opacity: 0.7; 
+    transform: translate(-50%, -50%) scale(1.1) rotateY(20deg); 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  70% { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1.05) rotateY(-5deg); 
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+  }
+  100% { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1) rotateY(0deg); 
+    box-shadow: 0 15px 50px rgba(0,0,0,0.7);
+  }
+}
+
+/* ===== Scrollbars ===== */
+.played-area::-webkit-scrollbar, .player-hand::-webkit-scrollbar, .chat-messages::-webkit-scrollbar, .players-container::-webkit-scrollbar { width: 8px; height: 8px; }
+.played-area::-webkit-scrollbar-track, .player-hand::-webkit-scrollbar-track, .chat-messages::-webkit-scrollbar-track, .players-container::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 4px; }
+.played-area::-webkit-scrollbar-thumb, .player-hand::-webkit-scrollbar-thumb, .chat-messages::-webkit-scrollbar-thumb, .players-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+.played-area::-webkit-scrollbar-thumb:hover, .player-hand::-webkit-scrollbar-thumb:hover, .chat-messages::-webkit-scrollbar-thumb:hover, .players-container::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
+
+/* ===== Mazo ===== */
+.deck-container { grid-area: deck; align-self: start; padding: 10px; position: relative; }
+.deck-container h3 { color: #fff; font-size: 14px; margin-bottom: 10px; text-align: center; }
+.card-deck {
+  position: relative; width: 120px; height: 170px;
+  background-size: cover; background-position: center;
+  border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  display: flex; align-items: center; justify-content: center;
+}
+.deck-count {
+  position: absolute; bottom: -10px; right: -10px; background: #111; color: #fff;
+  border-radius: 16px; padding: 2px 8px; font-weight: 700; border: 2px solid #fff;
+}
+.turn-indicator { display: flex; align-items: center; gap: 6px; margin: 6px 0 12px; }
+.draw-button {
+  margin-top: 10px; 
+  width: 100%; 
+  padding: 10px;
+  background: linear-gradient(145deg, #4CAF50, #45a049);
+  color: white; 
+  border: none; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  font-weight: bold;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+.draw-button:hover:not(:disabled) { 
+  transform: translateY(-2px); 
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3); 
+}
+.draw-button:disabled { 
+  background: #666; 
+  cursor: not-allowed; 
+  opacity: 0.5; 
+}
+
+/* ===== Lobby ===== */
+.lobby-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  transition: opacity 0.3s ease;
+}
+.lobby-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.lobby-card {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+}
+.lobby-card h1 {
+  font-size: 48px;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #4ade80, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.lobby-card > p {
+  font-size: 18px;
+  color: #9ca3af;
+  margin-bottom: 30px;
+}
+.lobby-register {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+.lobby-register input {
+  flex: 1;
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #4ade80;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+.lobby-register button {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #4ade80, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.lobby-register button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 222, 128, 0.4);
+}
+.cancel-btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #f87171, #dc2626) !important;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.lobby-players {
+  margin-bottom: 20px;
+}
+.lobby-players h3 {
+  color: #fff;
+  margin-bottom: 10px;
+}
+.lobby-players ul {
+  list-style: none;
+  padding: 0;
+}
+.lobby-players li {
+  padding: 8px;
+  margin: 5px 0;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.change-name-btn {
+  padding: 8px 16px;
+  font-size: 12px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.change-name-btn:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-1px);
+}
+/* Botones de chat del lobby */
+.lobby-chat-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+.chat-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #4ade80, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.chat-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);
+}
+
+/* Botón de música en el lobby */
+.lobby-chat-buttons .music-toggle {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #4ade80, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  position: static;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+}
+
+.lobby-chat-buttons .music-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);
+}
+
+.lobby-chat-buttons .music-toggle.playing {
+  background: linear-gradient(135deg, #10b981, #22c55e);
+}
+
+.lobby-chat-buttons .music-toggle.muted {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+
+.lobby-chat-buttons .music-toggle::before {
+  display: none;
+}
+
+/* Botón de abandonar partida del lobby */
+.leave-game-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  justify-self: center;
+  align-self: center;
+}
+
+.leave-game-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.lobby-msg {
+  font-size: 16px;
+}
+
+/* Mensaje de pantalla completa en lobby */
+.fullscreen-tip {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 250px;
+  padding: 15px;
+  background: rgba(74, 222, 128, 0.1);
+  border: 2px solid #4ade80;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.5;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.fullscreen-tip.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fullscreen-tip-icon {
+  font-size: 16px;
+  color: #4ade80;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.fullscreen-tip-text {
+  flex: 1;
+}
+
+.fullscreen-tip strong {
+  color: #4ade80;
+  font-weight: bold;
+}
+
+/* Modal de confirmación para salir */
+.exit-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+}
+
+.exit-modal-content {
+  background: linear-gradient(135deg, #1f2937, #374151);
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+.exit-modal-content h3 {
+  color: #f9fafb;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.exit-modal-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.exit-confirm-btn, .exit-cancel-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.exit-confirm-btn {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+.exit-confirm-btn:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+}
+
+.exit-cancel-btn {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  color: white;
+}
+
+.exit-cancel-btn:hover {
+  background: linear-gradient(135deg, #4b5563, #374151);
+  transform: translateY(-2px);
+  color: #9ca3af;
+  margin-bottom: 15px;
+}
+.countdown-display {
+  font-size: 72px;
+  font-weight: bold;
+  color: #4ade80;
+  display: none;
+  animation: countdownPulse 1s ease-in-out infinite;
+}
+@keyframes countdownPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* ===== Contador regresivo ===== */
+.countdown-display {
+  display: none;
+  margin-top: 20px;
+  font-size: 32px;
+  font-weight: 900;
+  color: #4CAF50;
+  text-align: center;
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+/* ===== Botón reinicio ===== */
+.restart-button {
+  position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%);
+  padding: 20px 40px; font-size: 20px; font-weight: bold; background: linear-gradient(145deg, #4CAF50, #45a049);
+  color: white; border: none; border-radius: 15px; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  z-index: 2001; transition: all 0.3s ease; opacity: 0; pointer-events: none;
+}
+.restart-button.show { opacity: 1; pointer-events: auto; animation: slideUp 0.5s ease-out forwards; }
+.restart-button:hover { transform: translateX(-50%) translateY(-5px); box-shadow: 0 12px 30px rgba(0,0,0,0.5); }
+.restart-button:active { transform: translateX(-50%) translateY(-2px); }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(50px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ===== Chat de Voz ===== */
+.voice-device-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 15px;
+  padding: 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+}
+.voice-device-selector label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+.device-select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: #0a0a0a;
+  color: #fff;
+  outline: none;
+  cursor: pointer;
+  font-size: 13px;
+}
+.device-select:hover { border-color: #666; }
+.device-select:focus { border-color: #3b82f6; }
+
+.voice-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+.voice-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid #444;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.voice-btn:hover {
+  background: #2a2a2a;
+  border-color: #666;
+}
+.voice-btn.mic-on {
+  background: #22c55e;
+  border-color: #16a34a;
+}
+.voice-btn.mic-off {
+  background: #dc2626;
+  border-color: #991b1b;
+}
+.voice-btn.speaker-on {
+  background: #3b82f6;
+  border-color: #2563eb;
+}
+.voice-btn.speaker-off {
+  background: #6b7280;
+  border-color: #4b5563;
+}
+
+.voice-info {
+  background: rgba(255,255,255,0.05);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+.voice-info p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+.voice-info strong {
+  color: #7dd3fc;
+}
+
+.tunnel-warning {
+  background: rgba(255, 193, 7, 0.15);
+  border: 1px solid rgba(255, 193, 7, 0.5);
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #ffc107;
+  line-height: 1.4;
+}
+
+.tunnel-warning #localUrl {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  color: #fff;
+  margin-left: 5px;
+}
+
+.discord-recommendation {
+  margin-top: 15px;
+  padding: 12px;
+  background: rgba(88, 101, 242, 0.1);
+  border: 1px solid rgba(88, 101, 242, 0.3);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.discord-recommendation p {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  color: #7dd3fc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.discord-join-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #5865F2, #4752C4);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.discord-join-btn:hover {
+  background: linear-gradient(135deg, #4752C4, #3C45A5);
+  transform: translateY(-1px);
+}
+
+.voice-users {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 5px;
+}
+.voice-user {
+  padding: 8px;
+  background: rgba(255,255,255,0.05);
+  margin-bottom: 5px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* ===== Panel de jugadores ===== */
+.players-list-panel {
+  position: fixed;
+  top: 360px;
+  left: 20px;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  z-index: 10;
+  width: 220px;
+  min-height: 180px;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+
+.players-list-panel.two-players {
+  height: 180px;
+}
+
+.players-list-panel.three-players {
+  height: 240px;
+}
+
+.players-list-panel.four-players {
+  height: 320px;
+}
+.players-list-panel h3 {
+  margin: 0 0 10px 0;
+  color: #60a5fa;
+  font-size: 14px;
+  text-align: center;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+  padding-bottom: 8px;
+  flex-shrink: 0;
+}
+.players-container {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  padding-right: 4px;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+.player-item.active-player {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(22, 163, 74, 0.3));
+  border-color: #22c55e;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
+  animation: pulse-active 2s infinite;
+}
+.player-item.my-player {
+  border-color: rgba(59, 130, 246, 0.8);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.25));
+}
+.player-item.active-player.my-player {
+  border-color: #fbbf24;
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.6);
+}
+.player-icon {
+  font-size: 18px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.player-name {
+  flex: 1;
+  font-weight: bold;
+  color: #fff;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.player-cards {
+  color: #fbbf24;
+  font-size: 11px;
+  font-weight: bold;
+  background: rgba(251, 191, 36, 0.2);
+  padding: 3px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+@keyframes pulse-active {
+  0%, 100% { box-shadow: 0 0 12px rgba(34, 197, 94, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.8); }
+}
+
+/* ===== Resaltados en paneles ===== */
+.highlight-title { color: #60a5fa; font-size: 1.05em; }
+.highlight-number {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.3));
+  padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #fbbf24;
+}
+.highlight-image {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(147, 51, 234, 0.3));
+  padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #c084fc;
+}
+.highlight-important {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(22, 163, 74, 0.3));
+  padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #4ade80;
+}
+.highlight-action {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.3));
+  padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #60a5fa;
+}
+.highlight-warning {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.3));
+  padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #f87171;
+}
+.highlight-objective {
+  color: #fbbf24; font-size: 1.1em; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+.highlight-win {
+  color: #4ade80; font-size: 1.1em; text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+}
+.highlight-sustainable {
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.3), rgba(16, 185, 129, 0.3));
+  padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #34d399;
+}
+
+.info-section-title {
+  color: #60a5fa; font-size: 1.2em; margin: 15px 0 10px 0;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.3); padding-bottom: 5px;
+}
+.info-category {
+  background: rgba(30, 41, 59, 0.5); padding: 12px; margin-bottom: 12px;
+  border-radius: 8px; border-left: 3px solid #60a5fa;
+}
+.category-title { color: #fbbf24; font-size: 1.05em; margin-bottom: 6px; }
+.info-category p { font-size: 0.95em; line-height: 1.5; color: #cbd5e1; }
+.info-note {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.2));
+  padding: 12px; border-radius: 8px; border: 2px solid rgba(59, 130, 246, 0.4); margin-top: 15px;
+}
+.info-note strong { color: #60a5fa; }
+
+
+
+/* Sección de recordatorios */
+.info-reminder-section {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.2));
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid rgba(34, 197, 94, 0.4);
+  margin-bottom: 15px;
+}
+
+.reminder-title {
+  color: #4ade80;
+  font-size: 1.1em;
+  margin-bottom: 12px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.reminder-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.reminder-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(22, 163, 74, 0.1);
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.reminder-icon {
+  font-size: 1.2em;
+  min-width: 24px;
+  text-align: center;
+}
+
+.reminder-text {
+  font-size: 0.9em;
+  color: #d1fae5;
+  font-weight: 500;
+}
+
+.panel-content ol {
+  list-style: none; counter-reset: rule-counter; padding-left: 0;
+}
+.panel-content ol li {
+  counter-increment: rule-counter; margin-bottom: 15px; padding-left: 40px;
+  position: relative; line-height: 1.6;
+}
+.panel-content ol li::before {
+  content: counter(rule-counter); position: absolute; left: 0; top: 0;
+  background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;
+  width: 28px; height: 28px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; font-weight: bold;
+  font-size: 14px; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1400px) {
+  .game-area { grid-template-columns: 130px 130px 1fr 60px 240px; }
+  .container { width: 480px; height: 480px; }
+  .outer-ring { width: 480px; height: 480px; }
+  .side-panel-left { width: 450px; left: -450px; }
+  .players-list-panel { top: 180px; width: 200px; }
+}
+@media (max-width: 1200px) {
+  .game-area { 
+    grid-template-columns: 110px 110px 1fr 50px 280px; /* Aumentado de 220px a 280px */
+    grid-template-rows: auto auto minmax(220px, auto);
+    padding: 15px 15px 10px 15px;
+  }
+  .card { width: 115px; height: 165px; padding: 6px; }
+  .card-text { font-size: 12px; padding: 5px; min-height: 50px; max-height: 100px; }
+  .player-hand { min-height: 220px; padding: 15px; }
+  .played-cards-container { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .game-area {
+    grid-template-areas: "main" "info" "played" "player" "deck" "discard";
+    grid-template-columns: 1fr; grid-template-rows: auto auto auto auto auto auto;
+  }
+  .info-panel-left { flex-direction: row; padding-top: 0; justify-content: center; }
+  .played-cards-container { grid-template-columns: 1fr; }
+  .container { width: 350px; height: 350px; }
+  .side-panel-left { width: 100%; left: -100%; }
+  .info-toggle { font-size: 16px; padding: 8px 12px; width: auto; height: auto; }
+  .reminder-grid { grid-template-columns: 1fr; }
+  .players-list-panel {
+    position: relative; top: auto; left: auto;
+    margin: 10px auto; width: 90%; max-width: 300px;
+  }
+}
+
+/* ===== Ajustes (sliders de volumen) ===== */
+.settings-group { display: flex; flex-direction: column; gap: 14px; }
+.settings-control { display: flex; align-items: center; gap: 12px; }
+.settings-control label { flex: 0 0 210px; font-weight: 700; color: #e5e7eb; }
+.settings-control input[type="range"] { flex: 1; accent-color: #60a5fa; }
+.settings-control .val { width: 56px; text-align: right; color: #93c5fd; font-weight: 700; }
+
+/* Botón abandonar partida */
+.leave-game-btn {
+  width: 100%;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+.leave-game-btn:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(239, 68, 68, 0.4);
+}
+
+.leave-game-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+/* Dado eliminado de los controles */
+.controls { display: flex; gap: 15px; align-items: center; justify-content: center; padding: 10px; flex-wrap: wrap; }
+.controls #diceImg { display: none; }
+
+/* ===== Efecto blur para el fondo durante el dado ===== */
+body.dice-blur .game-area,
+body.dice-blur .info-panel-left,
+body.dice-blur .played-area {
+  filter: blur(5px);
+  transition: filter 0.3s ease;
+}
+
+/* ===== Dado 3D personalizado ===== */
+.custom-dice-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  perspective: 1000px;
+  display: none;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.7);
+  width: 100vw;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-dice {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.dice-face {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+  border: 4px solid #495057;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 900;
+  color: #495057;
+  text-align: center;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.1), 0 8px 20px rgba(0,0,0,0.3);
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  font-family: 'Arial Black', Arial, sans-serif;
+}
+
+.dice-face.face1 { transform: rotateY(0deg) translateZ(60px); }
+.dice-face.face2 { transform: rotateY(90deg) translateZ(60px); }
+.dice-face.face3 { transform: rotateY(180deg) translateZ(60px); }
+.dice-face.face4 { transform: rotateY(-90deg) translateZ(60px); }
+.dice-face.face5 { transform: rotateX(90deg) translateZ(60px); }
+.dice-face.face6 { transform: rotateX(-90deg) translateZ(60px); }
+
+.dice-face.special {
+  background: linear-gradient(145deg, #ffd700, #ffb300);
+  color: #8b4513;
+  font-size: 14px;
+  padding: 8px;
+  line-height: 1.2;
+  background-image: url('img/derechos-humanos.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border-color: #ff6b35;
+  box-shadow: inset 0 0 15px rgba(255,107,53,0.3), 0 8px 20px rgba(255,107,53,0.4);
+}
+
+.dice-face .number-text {
+  background: linear-gradient(45deg, #ff6b35, #f7931e, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 28px;
+  font-weight: 900;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes rollDice {
+  0% { 
+    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+  }
+  25% { 
+    transform: rotateX(180deg) rotateY(180deg) rotateZ(90deg);
+  }
+  50% { 
+    transform: rotateX(360deg) rotateY(360deg) rotateZ(180deg);
+  }
+  75% { 
+    transform: rotateX(540deg) rotateY(180deg) rotateZ(270deg);
+  }
+  100% { 
+    transform: rotateX(720deg) rotateY(360deg) rotateZ(360deg);
+  }
+}
+
+.custom-dice.rolling {
+  animation: rollDice 2s ease-in-out;
+}
+
+/* Mostrar el dado cuando está activo */
+.custom-dice-container.active {
+  display: flex;
+}
+
+/* ===== Tooltips personalizados ===== */
+/* ===== Tooltips personalizados ===== */
+.info-btn {
+  position: relative;
+  cursor: pointer;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #6802bb, #ca04ca);
+  border: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.info-btn::after {
+  content: attr(title);
+  position: absolute;
+  right: 100%; /* Cambiado de left a right */
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 10px; /* Cambiado de margin-left a margin-right */
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  font-size: 14px;
+  white-space: nowrap;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.info-btn::before {
+  content: "";
+  position: absolute;
+  right: 100%; /* Cambiado de left a right */
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 2px; /* Cambiado de margin-left a margin-right */
+  border: 6px solid transparent;
+  border-left-color: rgba(0, 0, 0, 0.9); /* Cambiado de border-right a border-left */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+}
+
+.info-btn:hover::after,
+.info-btn:hover::before {
+  opacity: 1;
+}
+
+.info-btn[title] {
+  position: relative;
+}
+
+/* ===== Hamburger Icon para Panel Toggle ===== */
+.hamburger-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 2px;
+}
+
+.hamburger-icon div {
+  width: 60%;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+}
+
+/* Efecto hover del hamburger icon */
+.panel-toggle-btn:hover .hamburger-icon div {
+  background-color: #fff;
+  transform: scaleX(0.8);
+}
+
+/* Animación cuando el panel está expandido */
+.info-panel-left.expanded .hamburger-icon div:nth-child(1) {
+  transform: rotate(45deg) translate(3px, 3px);
+}
+
+.info-panel-left.expanded .hamburger-icon div:nth-child(2) {
+  opacity: 0;
+}
+
+.info-panel-left.expanded .hamburger-icon div:nth-child(3) {
+  transform: rotate(-45deg) translate(3px, -3px);
+}
+
+.voice-connect-container {
+  margin: 15px 0;
+  text-align: center;
+}
+
+.voice-connect-btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.voice-connect-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+.voice-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.disconnect-btn {
+  background: linear-gradient(135deg, #f44336, #d32f2f) !important;
+}
+
+.disconnect-btn:hover {
+  background: linear-gradient(135deg, #d32f2f, #b71c1c) !important;
+}
+
+    .card.hold-invalid {
+      outline: 3px dashed #ff4d4d;
+      filter: saturate(60%);
+      animation: pulseHold 800ms ease-in-out infinite alternate;
+      z-index: 20;
+    }
+    @keyframes pulseHold {
+      0% { transform: translateY(-6px) scale(1.02); }
+      100% { transform: translateY(-2px) scale(1.05); }
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-4px); }
+    }
+    .floating-card {
+      position: fixed;
+      width: 120px;
+      height: 170px;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+      z-index: 3000;
+      overflow: hidden;
+      transform: translate(0,0);
+      transition: transform 450ms cubic-bezier(.17,.67,.35,1), opacity 220ms ease-out;
+      will-change: transform, opacity;
+    }
+
+        .card.hold-invalid{outline:3px dashed #ff4d4d;filter:saturate(60%);animation:pulseHold 800ms ease-in-out infinite alternate;z-index:20}
+    @keyframes pulseHold{0%{transform:translateY(-6px) scale(1.02)}100%{transform:translateY(-2px) scale(1.05)}}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+    .floating-card{position:fixed;width:160px;height:240px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.35);z-index:3000;overflow:hidden;transform:translate(0,0);transition:transform 450ms cubic-bezier(.17,.67,.35,1),opacity 220ms ease-out;will-change:transform,opacity}
+
+/* ===== RESPONSIVE DESIGN - RESPALDO + CSS MODULARES ===== */
+/* Base: 1920x1080 (referencia principal) - sin cambios */
+/* 
+  SISTEMA HÍBRIDO:
+  1. Estas media queries funcionan como RESPALDO si JavaScript falla
+  2. Los CSS modulares (/css/*.css) se cargan dinámicamente para mejor rendimiento
+  3. Las reglas modulares tienen mayor especificidad y sobrescriben estas
+*/
+
+/* 🖥️ 2560x1440 (4K) - RESPALDO - Se sobrescribe por css/4k-2560x1440.css */
+@media screen and (min-width: 2560px) and (min-height: 1440px) {
+  .game-area {
+    /* LÍNEA 1857: Ancho columnas: [DECK][DISCARD][MAIN][INFO][PLAYED] */
+    grid-template-columns: 180px 180px 1fr 80px 400px;
+    /* LÍNEA 1858: Alto filas: [SUPERIOR][MEDIA][INFERIOR-mano jugador] */
+    grid-template-rows: auto auto minmax(350px, auto);
+    /* LÍNEA 1859: Márgenes internos: [ARRIBA][DERECHA][ABAJO][IZQUIERDA] */
+    padding: 30px 30px 15px 30px;
+    /* LÍNEA 1860: Espacio entre áreas del grid */
+    gap: 20px;
+  }
+  
+  /* RULETA CENTRAL - Ajustar proporcionalmente */
+  .container { width: 680px; height: 680px; }           /* LÍNEA 1863: Contenedor base ruleta */
+  .outer-ring { width: 720px; height: 720px; }          /* LÍNEA 1864: Anillo exterior (8 secciones ODS) */
+  .sections-wheel { width: 200px; height: 200px; }      /* LÍNEA 1865: Rueda de secciones centrales */
+  .ring-wheel { width: 300px; height: 300px; }          /* LÍNEA 1866: Anillo interior (números 1-17) */
+  .wheel { width: 120px; height: 120px; }               /* LÍNEA 1867: Flecha/indicador central */
+  
+  /* IMÁGENES ANILLO EXTERIOR - Tamaños grandes para 4K */
+  .outer-label { width: 140px; height: 140px; margin-left: -70px; margin-top: -70px; }
+  .outer-label img { border-radius: 18px; border: 4px solid rgba(255,255,255,0.9); }
+
+  /* CARTAS - Tamaños escalados proporcionalmente */
+  .card { width: 100px; height: 140px; font-size: 11px; }           /* LÍNEA 1869: Carta base + tamaño fuente */
+  .player-hand .card { width: 95px; height: 135px; }                /* LÍNEA 1870: Cartas en mano jugador */
+  .played-cards-container .card { width: 90px; height: 125px; }     /* LÍNEA 1871: Cartas ya jugadas */
+  
+  /* PANELES LATERALES - Ancho de información */
+  .players-list-panel { width: 200px; }                 /* LÍNEA 1873: Panel jugadores (derecha) */
+  .info-panel-left { width: 420px; }                    /* LÍNEA 1874: Panel información (izquierda) */
+}
+
+/* 💻 1680x1050 - RESPALDO - Se sobrescribe por css/desktop-1680x1050.css */
+@media screen and (width: 1680px) and (height: 1050px) {
+  .game-area {
+    /* LÍNEA 1885: Columnas más compactas para aspecto 16:10 */
+    grid-template-columns: 140px 140px 1fr 55px 320px;
+    /* LÍNEA 1886: Filas ajustadas para altura 1050px */
+    grid-template-rows: auto auto minmax(260px, auto);
+    /* LÍNEA 1887: Padding reducido vs 4K */
+    padding: 18px 18px 8px 18px;
+    /* LÍNEA 1888: Gap menor entre elementos */
+    gap: 12px;
+  }
+  
+  /* RULETA - Tamaño medio para 1680px ancho */
+  .container { width: 520px; height: 520px; }           /* LÍNEA 1891: Base ruleta -23% vs 4K */
+  .outer-ring { width: 560px; height: 560px; }          /* LÍNEA 1892: Anillo exterior -22% vs 4K */
+  .sections-wheel { width: 150px; height: 150px; }      /* LÍNEA 1893: Secciones centrales -25% vs 4K */
+  .ring-wheel { width: 225px; height: 225px; }          /* LÍNEA 1894: Anillo interior -25% vs 4K */
+  .wheel { width: 90px; height: 90px; }                 /* LÍNEA 1895: Flecha -25% vs 4K */
+  
+  /* IMÁGENES ANILLO EXTERIOR - Tamaños para 1680x1050 */
+  .outer-label { width: 110px; height: 110px; margin-left: -55px; margin-top: -55px; }
+  .outer-label img { border-radius: 15px; border: 3px solid rgba(255,255,255,0.9); }
+
+  /* CARTAS - Proporcionalmente reducidas */
+  .card { width: 75px; height: 105px; font-size: 9px; }           /* LÍNEA 1897: Carta base -25% vs 4K */
+  .player-hand .card { width: 72px; height: 100px; }              /* LÍNEA 1898: Mano jugador -24% vs 4K */
+  .played-cards-container .card { width: 70px; height: 95px; }    /* LÍNEA 1899: Cartas jugadas -22% vs 4K */
+  
+  /* PANELES - Ancho ajustado para 1680px */
+  .players-list-panel { width: 160px; }                 /* LÍNEA 1901: Panel jugadores -20% vs 4K */
+  .info-panel-left { width: 360px; }                    /* LÍNEA 1902: Panel info -14% vs 4K */
+}
+
+/* 🖱️ 1440x900 - RESPALDO - Se sobrescribe por css/desktop-1440x900.css */
+@media screen and (width: 1440px) and (height: 900px) {
+  .game-area {
+    /* LÍNEA 1913: Columnas compactas para 1440px ancho */
+    grid-template-columns: 130px 130px 1fr 50px 300px;
+    /* LÍNEA 1914: Filas para altura limitada 900px */
+    grid-template-rows: auto auto minmax(240px, auto);
+    /* LÍNEA 1915: Padding mínimo para aprovechar espacio */
+    padding: 15px 15px 8px 15px;
+    /* LÍNEA 1916: Gap reducido entre elementos */
+    gap: 10px;
+  }
+  
+  /* RULETA - Tamaño compacto para pantalla mediana */
+  .container { width: 480px; height: 480px; }           /* LÍNEA 1919: Base -29% vs 4K */
+  .outer-ring { width: 520px; height: 520px; }          /* LÍNEA 1920: Anillo exterior -28% vs 4K */
+  .sections-wheel { width: 140px; height: 140px; }      /* LÍNEA 1921: Secciones -30% vs 4K */
+  .ring-wheel { width: 210px; height: 210px; }          /* LÍNEA 1922: Anillo interior -30% vs 4K */
+  .wheel { width: 85px; height: 85px; }                 /* LÍNEA 1923: Flecha -29% vs 4K */
+  
+  /* IMÁGENES ANILLO EXTERIOR - Tamaños para 1440x900 */
+  .outer-label { width: 100px; height: 100px; margin-left: -50px; margin-top: -50px; }
+  .outer-label img { border-radius: 12px; border: 3px solid rgba(255,255,255,0.9); }
+
+  /* CARTAS - Más pequeñas para espacio limitado */
+  .card { width: 70px; height: 98px; font-size: 8px; }            /* LÍNEA 1925: Carta base -30% vs 4K */
+  .player-hand .card { width: 68px; height: 95px; }               /* LÍNEA 1926: Mano -28% vs 4K */
+  .played-cards-container .card { width: 65px; height: 90px; }    /* LÍNEA 1927: Jugadas -28% vs 4K */
+  
+  /* PANELES - Reducidos para 1440px */
+  .players-list-panel { width: 150px; }                 /* LÍNEA 1929: Panel jugadores -25% vs 4K */
+  .info-panel-left { width: 340px; }                    /* LÍNEA 1930: Panel info -19% vs 4K */
+}
+
+/* 🖥️ 1366x768 - RESPALDO - Se sobrescribe por css/laptop-1366x768.css */
+@media screen and (width: 1366px) and (height: 768px) {
+  .game-area {
+    /* LÍNEA 1941: Columnas optimizadas para laptop estándar */
+    grid-template-columns: 120px 120px 1fr 45px 280px;
+    /* LÍNEA 1942: Filas compactas para altura 768px */
+    grid-template-rows: auto auto minmax(220px, auto);
+    /* LÍNEA 1943: Padding mínimo lateral y vertical */
+    padding: 12px 12px 6px 12px;
+    /* LÍNEA 1944: Gap muy reducido para máximo espacio */
+    gap: 8px;
+  }
+  
+  /* RULETA - Tamaño optimizado para laptop */
+  .container { width: 440px; height: 440px; }           /* LÍNEA 1947: Base -35% vs 4K */
+  .outer-ring { width: 480px; height: 480px; }          /* LÍNEA 1948: Anillo exterior -33% vs 4K */
+  .sections-wheel { width: 130px; height: 130px; }      /* LÍNEA 1949: Secciones -35% vs 4K */
+  .ring-wheel { width: 190px; height: 190px; }          /* LÍNEA 1950: Anillo interior -37% vs 4K */
+  .wheel { width: 80px; height: 80px; }                 /* LÍNEA 1951: Flecha -33% vs 4K */
+  
+  /* IMÁGENES ANILLO EXTERIOR - Tamaños para 1366x768 */
+  .outer-label { width: 90px; height: 90px; margin-left: -45px; margin-top: -45px; }
+  .outer-label img { border-radius: 10px; border: 2px solid rgba(255,255,255,0.9); }
+
+  /* CARTAS - Pequeñas pero legibles */
+  .card { width: 65px; height: 90px; font-size: 7px; }            /* LÍNEA 1953: Carta base -35% vs 4K */
+  .player-hand .card { width: 63px; height: 88px; }               /* LÍNEA 1954: Mano -34% vs 4K */
+  .played-cards-container .card { width: 60px; height: 85px; }    /* LÍNEA 1955: Jugadas -33% vs 4K */
+  
+  /* PANELES - Compactos para laptop */
+  .players-list-panel { width: 140px; }                 /* LÍNEA 1957: Panel jugadores -30% vs 4K */
+  .info-panel-left { width: 320px; }                    /* LÍNEA 1958: Panel info -24% vs 4K */
+  
+  /* TEXTO - Ajuste específico para legibilidad */
+  .card-text { padding: 4px; line-height: 1.1; }        /* LÍNEA 1960: Texto cartas con padding */
+}
+
+/* 📺 1280x720 - RESPALDO - Se sobrescribe por css/hd-1280x720.css */
+@media screen and (width: 1280px) and (height: 720px) {
+  .game-area {
+    /* LÍNEA 1972: Columnas muy compactas para HD 720p */
+    grid-template-columns: 110px 110px 1fr 40px 260px;
+    /* LÍNEA 1973: Filas mínimas para altura 720px */
+    grid-template-rows: auto auto minmax(200px, auto);
+    /* LÍNEA 1974: Padding muy reducido */
+    padding: 10px 10px 5px 10px;
+    /* LÍNEA 1975: Gap mínimo entre elementos */
+    gap: 6px;
+  }
+  
+  /* RULETA - Tamaño reducido para HD 720p */
+  .container { width: 400px; height: 400px; }           /* LÍNEA 1978: Base -41% vs 4K */
+  .outer-ring { width: 440px; height: 440px; }          /* LÍNEA 1979: Anillo exterior -39% vs 4K */
+  .sections-wheel { width: 120px; height: 120px; }      /* LÍNEA 1980: Secciones -40% vs 4K */
+  .ring-wheel { width: 175px; height: 175px; }          /* LÍNEA 1981: Anillo interior -42% vs 4K */
+  .wheel { width: 75px; height: 75px; }                 /* LÍNEA 1982: Flecha -37% vs 4K */
+  
+  /* IMÁGENES ANILLO EXTERIOR - Tamaños para 1280x720 */
+  .outer-label { width: 80px; height: 80px; margin-left: -40px; margin-top: -40px; }
+  .outer-label img { border-radius: 8px; border: 2px solid rgba(255,255,255,0.9); }
+
+  /* CARTAS - Muy pequeñas pero funcionales */
+  .card { width: 60px; height: 85px; font-size: 6px; }            /* LÍNEA 1984: Carta base -40% vs 4K */
+  .player-hand .card { width: 58px; height: 82px; }               /* LÍNEA 1985: Mano -39% vs 4K */
+  .played-cards-container .card { width: 55px; height: 78px; }    /* LÍNEA 1986: Jugadas -39% vs 4K */
+  
+  /* PANELES - Muy compactos para HD */
+  .players-list-panel { width: 130px; }                 /* LÍNEA 1988: Panel jugadores -35% vs 4K */
+  .info-panel-left { width: 300px; }                    /* LÍNEA 1989: Panel info -29% vs 4K */
+  
+  /* TEXTO Y CONTROLES - Ajustes específicos para HD 720p */
+  .card-text { padding: 3px; line-height: 1.0; }        /* LÍNEA 1991: Texto más compacto */
+  .controls button { padding: 6px 12px; font-size: 12px; }  /* LÍNEA 1992: Botones reducidos */
+}
+
+/* 📟 Netbooks - RESPALDO - Se sobrescribe por css/netbook-1024x600.css */
+@media screen and (max-width: 1279px) or (max-height: 719px) {
+  /* LÍNEA 2003: ACTIVAR SCROLL para resoluciones muy pequeñas */
+  html, body { overflow: auto; }
+  
+  .game-area {
+    /* LÍNEA 2006: Altura mínima para permitir scroll vertical */
+    min-height: 100vh;
+    /* LÍNEAS 2007-2010: Mantener grid areas definidas explícitamente */
+    grid-template-areas:
+      "deck discard main info played"
+      ". . main info played"
+      "player player player player player";
+    /* LÍNEA 2011: Columnas ultra-compactas para netbooks */
+    grid-template-columns: 100px 100px 1fr 35px 240px;
+    /* LÍNEA 2012: Filas mínimas para máximo aprovechamiento */
+    grid-template-rows: auto auto minmax(180px, auto);
+    /* LÍNEA 2013: Padding ultra-reducido */
+    padding: 8px 8px 4px 8px;
+    /* LÍNEA 2014: Gap mínimo posible */
+    gap: 5px;
+  }
+  
+  /* RULETA - Tamaño mínimo funcional para netbooks */
+  .container { width: 360px; height: 360px; }           /* LÍNEA 2017: Base -47% vs 4K */
+  .outer-ring { width: 400px; height: 400px; }          /* LÍNEA 2018: Anillo exterior -44% vs 4K */
+  .sections-wheel { width: 110px; height: 110px; }      /* LÍNEA 2019: Secciones -45% vs 4K */
+  .ring-wheel { width: 160px; height: 160px; }          /* LÍNEA 2020: Anillo interior -47% vs 4K */
+  .wheel { width: 70px; height: 70px; }                 /* LÍNEA 2021: Flecha -42% vs 4K */
+  
+  /* IMÁGENES ANILLO EXTERIOR - Tamaños para 1024x600 */
+  .outer-label { width: 70px; height: 70px; margin-left: -35px; margin-top: -35px; }
+  .outer-label img { border-radius: 6px; border: 2px solid rgba(255,255,255,0.9); }
+
+  /* CARTAS - Tamaño ultra-compacto */
+  .card { width: 55px; height: 78px; font-size: 6px; }            /* LÍNEA 2023: Carta base -45% vs 4K */
+  .player-hand .card { width: 53px; height: 75px; }               /* LÍNEA 2024: Mano -44% vs 4K */
+  .played-cards-container .card { width: 50px; height: 72px; }    /* LÍNEA 2025: Jugadas -44% vs 4K */
+  
+  /* PANELES - Ultra-compactos con fuente reducida */
+  .players-list-panel { width: 120px; font-size: 11px; }  /* LÍNEA 2027: Panel jugadores + font pequeña */
+  .info-panel-left { width: 280px; }                      /* LÍNEA 2028: Panel info -33% vs 4K */
+  
+  /* TEXTO Y CONTROLES - Extremadamente compactos */
+  .card-text { padding: 2px; line-height: 0.9; }          /* LÍNEA 2030: Texto ultra-compacto */
+  .controls button { padding: 4px 8px; font-size: 10px; } /* LÍNEA 2031: Botones mínimos */
+  
+  /* SCROLL FORZADO - Para netbooks con espacio limitado */
+  .player-hand {                                           /* LÍNEAS 2033-2036: Mano con scroll */
+    max-height: 120px;
+    overflow-y: auto;
+  }
+  .played-cards-container {                                /* LÍNEAS 2037-2040: Cartas jugadas con scroll */
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  
+  /* PANELES COMPACTOS - Ajustes finales para netbooks */
+  .side-panel-left { width: 250px; font-size: 11px; }     /* LÍNEA 2043: Panel lateral reducido */
+  .lobby-card { max-width: 90vw; padding: 15px; }         /* LÍNEA 2044: Lobby adaptativo */
+}
+
+/* 📐 Pantallas ultrawide (21:9 o más anchas) - LÍNEAS 2054-2061 */
+@media screen and (min-aspect-ratio: 21/9) {
+  .game-area {
+    /* LÍNEA 2056: Columnas expandidas para ultrawide */
+    grid-template-columns: 200px 200px 1fr 100px 420px;
+    /* LÍNEA 2057: Ancho máximo para centrar el juego */
+    max-width: 2400px;
+    /* LÍNEA 2058: Centrado horizontal automático */
+    margin: 0 auto;
+  }
+}
+
+/* 📏 Pantallas muy altas (tablets en vertical, monitores 4:3) - LÍNEAS 2063-2070 */
+@media screen and (min-aspect-ratio: 4/5) and (max-aspect-ratio: 9/16) {
+  .game-area {
+    /* LÍNEA 2065: Filas expandidas para pantallas altas */
+    grid-template-rows: auto auto minmax(400px, 1fr);
+    /* LÍNEA 2066: Padding vertical extra arriba */
+    padding-top: 40px;
+    /* LÍNEA 2067: Padding vertical extra abajo */
+    padding-bottom: 40px;
+  }
+}

@@ -1,0 +1,19 @@
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+*.log
+
+# Archivos de desarrollo
+node_modules/
+.env
+
+# Archivos temporales
+*.tmp
+*.bak
+
+# Archivos grandes
+*.exe
+*.zip
+*.m4a
+cloudflared*
+ngrok*

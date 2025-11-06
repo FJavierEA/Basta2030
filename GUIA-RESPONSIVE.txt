@@ -1,0 +1,112 @@
+/* ===== GUÍA COMPLETA DE AJUSTES RESPONSIVE ===== */
+/* Archivo: anillo.css - Líneas 1851-2070 */
+
+📍 MAPA DE LÍNEAS POR RESOLUCIÓN:
+
+🖥️ 2560x1440 (4K Desktop) ──────── LÍNEAS 1855-1882
+💻 1680x1050 (16:10 Large) ────── LÍNEAS 1884-1911  
+🖱️ 1440x900 (16:10 Medium) ───── LÍNEAS 1913-1940
+🖥️ 1366x768 (Laptop HD) ────────── LÍNEAS 1942-1969
+📺 1280x720 (HD Ready) ─────────── LÍNEAS 1971-1998
+📟 Netbooks (<1280x720) ────────── LÍNEAS 2000-2052
+📐 Ultrawide (21:9+) ──────────────── LÍNEAS 2054-2061
+📏 Pantallas Altas (4:3) ─────────── LÍNEAS 2063-2070
+
+🎯 QUÉ AJUSTAR EN CADA LÍNEA:
+
+┌─ GRID LAYOUT (.game-area) ─┐
+│ grid-template-columns → Ancho de las 5 columnas: [DECK][DISCARD][MAIN][INFO][PLAYED]
+│ grid-template-rows    → Alto de las 3 filas: [SUPERIOR][MEDIA][INFERIOR]
+│ padding               → Márgenes: [ARRIBA][DERECHA][ABAJO][IZQUIERDA]
+│ gap                   → Espacio entre áreas del grid
+└─────────────────────────────┘
+
+┌─ RULETA CENTRAL ─┐
+│ .container        → Contenedor base de toda la ruleta
+│ .outer-ring       → Anillo exterior (8 secciones ODS)
+│ .sections-wheel   → Rueda de secciones centrales
+│ .ring-wheel       → Anillo interior (números 1-17)
+│ .wheel            → Flecha/indicador central
+└───────────────────┘
+
+┌─ CARTAS ─┐
+│ .card                          → Tamaño base + fuente
+│ .player-hand .card             → Cartas en mano del jugador
+│ .played-cards-container .card  → Cartas ya jugadas
+│ .card-text                     → Texto dentro de cartas (solo algunas resoluciones)
+└───────────┘
+
+┌─ PANELES LATERALES ─┐
+│ .players-list-panel → Panel jugadores (derecha)
+│ .info-panel-left    → Panel información (izquierda)
+└─────────────────────┘
+
+┌─ CONTROLES (solo resoluciones pequeñas) ─┐
+│ .controls button → Botones de juego
+│ html, body       → Scroll habilitado/deshabilitado
+└───────────────────────────────────────────┘
+
+📊 VALORES DE REFERENCIA POR RESOLUCIÓN:
+
+RESOLUCIÓN    | CONTAINER | OUTER-RING | CARD BASE | DECK/DISCARD | PLAYED
+────────────────────────────────────────────────────────────────────────
+2560x1440 4K | 680x680   | 720x720    | 100x140   | 180px        | 400px
+1680x1050     | 520x520   | 560x560    | 75x105    | 140px        | 320px
+1440x900      | 480x480   | 520x520    | 70x98     | 130px        | 300px
+1366x768      | 440x440   | 480x480    | 65x90     | 120px        | 280px
+1280x720      | 400x400   | 440x440    | 60x85     | 110px        | 260px
+Netbooks      | 360x360   | 400x400    | 55x78     | 100px        | 240px
+
+🔧 CÓMO USAR ESTA GUÍA:
+
+1. IDENTIFICA LA RESOLUCIÓN que quieres ajustar
+2. VE A LAS LÍNEAS correspondientes en anillo.css
+3. MODIFICA LOS VALORES según necesites:
+   - Más grande → Aumenta px
+   - Más pequeño → Reduce px  
+   - Más espacio → Aumenta gap/padding
+   - Menos espacio → Reduce gap/padding
+
+4. GUARDA Y PRUEBA en el simulador de Edge F12
+
+💡 TIPS DE AJUSTE:
+
+✅ Mantén PROPORCIONES entre elementos
+✅ Prueba en el simulador ANTES de aplicar
+✅ Ajusta UNO a la vez para ver efectos
+✅ Usa la referencia 1920x1080 como base
+✅ Netbooks necesitan SCROLL habilitado
+
+❌ NO rompas el layout del grid
+❌ NO hagas elementos demasiado pequeños
+❌ NO olvides probar la jugabilidad
+❌ NO cambies todas las resoluciones a la vez
+
+🎮 FLUJO DE TRABAJO RECOMENDADO:
+
+1. Abre Edge F12 > Simulador
+2. Selecciona resolución objetivo  
+3. Ve a las líneas correspondientes
+4. Ajusta UN valor por vez
+5. Recarga (F5) y verifica
+6. Repite hasta que esté perfecto
+7. Pasa a la siguiente resolución
+
+🎯 ELEMENTOS MÁS IMPORTANTES A AJUSTAR:
+
+PRIORIDAD ALTA:
+- grid-template-columns (distribución horizontal)
+- .container (tamaño ruleta principal)
+- .card width/height (legibilidad cartas)
+
+PRIORIDAD MEDIA:
+- padding/gap (espaciado general)
+- .outer-ring/.ring-wheel (proporción ruleta)
+- .players-list-panel width (panel derecha)
+
+PRIORIDAD BAJA:
+- .wheel (flecha central)
+- .card-text (detalles texto)
+- .controls button (solo netbooks)
+
+¡Usa esta guía como referencia mientras ajustas cada resolución! 🎨

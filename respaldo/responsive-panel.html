@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Ajuste Responsive - Basta</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .resolution-panel {
+            background: #2d2d30;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #3c3c3c;
+        }
+        .resolution-title {
+            color: #4CAF50;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .status.pending { background: #FF9800; }
+        .status.testing { background: #2196F3; }
+        .status.done { background: #4CAF50; }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .control-group {
+            background: #3c3c3c;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        .control-group h4 {
+            color: #FFD700;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        .input-row label {
+            min-width: 80px;
+            font-size: 12px;
+            color: #ccc;
+        }
+        .input-row input {
+            flex: 1;
+            padding: 4px 8px;
+            border: 1px solid #555;
+            border-radius: 3px;
+            background: #2d2d30;
+            color: #fff;
+            font-size: 12px;
+        }
+        .copy-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .copy-btn:hover {
+            background: #45a049;
+        }
+        .instructions {
+            background: #1565C0;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .instructions h3 {
+            margin: 0 0 10px 0;
+            color: #fff;
+        }
+        .step {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .highlight {
+            background: #FFD700;
+            color: #000;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+        .device-list {
+            background: #2d2d30;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Panel de Ajuste Responsive - Basta</h1>
+        
+        <div class="instructions">
+            <h3>📋 Instrucciones de Uso</h3>
+            <div class="step">1. Abre <span class="highlight">Edge</span> y ve a tu juego local</div>
+            <div class="step">2. Presiona <span class="highlight">F12</span> para abrir DevTools</div>
+            <div class="step">3. Haz clic en el ícono <span class="highlight">📱 Toggle Device Emulation</span></div>
+            <div class="step">4. Selecciona <span class="highlight">"Edit..."</span> para agregar dispositivos personalizados</div>
+            <div class="step">5. Agrega estas resoluciones:</div>
+            
+            <div class="device-list">
+4K Desktop: 2560 x 1440<br>
+16:10 Large: 1680 x 1050<br>
+16:10 Medium: 1440 x 900<br>
+Laptop HD: 1366 x 768<br>
+HD Ready: 1280 x 720<br>
+Netbook: 1024 x 600
+            </div>
+            
+            <div class="step">6. Para cada resolución, ajusta los valores abajo</div>
+            <div class="step">7. Usa <span class="highlight">Ctrl+Shift+C</span> para inspeccionar elementos</div>
+            <div class="step">8. Copia el CSS generado y pégalo en <span class="highlight">anillo.css</span></div>
+        </div>
+
+        <!-- 4K Desktop -->
+        <div class="resolution-panel">
+            <div class="resolution-title">
+                🖥️ 2560x1440 (4K Desktop)
+                <span class="status pending">Pendiente</span>
+            </div>
+            <div class="controls">
+                <div class="control-group">
+                    <h4>Grid Layout</h4>
+                    <div class="input-row">
+                        <label>Columnas:</label>
+                        <input type="text" id="4k-columns" value="180px 180px 1fr 80px 400px">
+                    </div>
+                    <div class="input-row">
+                        <label>Filas:</label>
+                        <input type="text" id="4k-rows" value="auto auto minmax(350px, auto)">
+                    </div>
+                    <div class="input-row">
+                        <label>Padding:</label>
+                        <input type="text" id="4k-padding" value="30px 30px 15px 30px">
+                    </div>
+                    <div class="input-row">
+                        <label>Gap:</label>
+                        <input type="text" id="4k-gap" value="20px">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <h4>Ruleta</h4>
+                    <div class="input-row">
+                        <label>Container:</label>
+                        <input type="text" id="4k-container" value="680px">
+                    </div>
+                    <div class="input-row">
+                        <label>Outer Ring:</label>
+                        <input type="text" id="4k-outer" value="720px">
+                    </div>
+                    <div class="input-row">
+                        <label>Inner Ring:</label>
+                        <input type="text" id="4k-inner" value="300px">
+                    </div>
+                    <div class="input-row">
+                        <label>Wheel:</label>
+                        <input type="text" id="4k-wheel" value="120px">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <h4>Cartas</h4>
+                    <div class="input-row">
+                        <label>Base:</label>
+                        <input type="text" id="4k-card" value="100px x 140px">
+                    </div>
+                    <div class="input-row">
+                        <label>Mano:</label>
+                        <input type="text" id="4k-hand" value="95px x 135px">
+                    </div>
+                    <div class="input-row">
+                        <label>Jugadas:</label>
+                        <input type="text" id="4k-played" value="90px x 125px">
+                    </div>
+                    <div class="input-row">
+                        <label>Font Size:</label>
+                        <input type="text" id="4k-font" value="11px">
+                    </div>
+                </div>
+            </div>
+            <button class="copy-btn" onclick="generateCSS('4k', '2560px', '1440px')">📋 Copiar CSS</button>
+        </div>
+
+        <!-- 1680x1050 -->
+        <div class="resolution-panel">
+            <div class="resolution-title">
+                💻 1680x1050 (16:10 Large)
+                <span class="status pending">Pendiente</span>
+            </div>
+            <div class="controls">
+                <div class="control-group">
+                    <h4>Grid Layout</h4>
+                    <div class="input-row">
+                        <label>Columnas:</label>
+                        <input type="text" id="1680-columns" value="140px 140px 1fr 55px 320px">
+                    </div>
+                    <div class="input-row">
+                        <label>Filas:</label>
+                        <input type="text" id="1680-rows" value="auto auto minmax(260px, auto)">
+                    </div>
+                    <div class="input-row">
+                        <label>Padding:</label>
+                        <input type="text" id="1680-padding" value="18px 18px 8px 18px">
+                    </div>
+                    <div class="input-row">
+                        <label>Gap:</label>
+                        <input type="text" id="1680-gap" value="12px">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <h4>Ruleta</h4>
+                    <div class="input-row">
+                        <label>Container:</label>
+                        <input type="text" id="1680-container" value="520px">
+                    </div>
+                    <div class="input-row">
+                        <label>Outer Ring:</label>
+                        <input type="text" id="1680-outer" value="560px">
+                    </div>
+                    <div class="input-row">
+                        <label>Inner Ring:</label>
+                        <input type="text" id="1680-inner" value="225px">
+                    </div>
+                    <div class="input-row">
+                        <label>Wheel:</label>
+                        <input type="text" id="1680-wheel" value="90px">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <h4>Cartas</h4>
+                    <div class="input-row">
+                        <label>Base:</label>
+                        <input type="text" id="1680-card" value="75px x 105px">
+                    </div>
+                    <div class="input-row">
+                        <label>Mano:</label>
+                        <input type="text" id="1680-hand" value="72px x 100px">
+                    </div>
+                    <div class="input-row">
+                        <label>Jugadas:</label>
+                        <input type="text" id="1680-played" value="70px x 95px">
+                    </div>
+                    <div class="input-row">
+                        <label>Font Size:</label>
+                        <input type="text" id="1680-font" value="9px">
+                    </div>
+                </div>
+            </div>
+            <button class="copy-btn" onclick="generateCSS('1680', '1680px', '1050px')">📋 Copiar CSS</button>
+        </div>
+
+        <!-- Más resoluciones aquí... -->
+        
+        <div id="output" style="background: #000; padding: 20px; border-radius: 8px; margin-top: 20px; display: none;">
+            <h3>📄 CSS Generado</h3>
+            <pre id="css-output" style="color: #0f0; font-family: 'Courier New', monospace; white-space: pre-wrap; font-size: 12px;"></pre>
+            <button class="copy-btn" onclick="copyToClipboard()">📋 Copiar al Portapapeles</button>
+        </div>
+    </div>
+
+    <script>
+        function generateCSS(prefix, width, height) {
+            const columns = document.getElementById(prefix + '-columns').value;
+            const rows = document.getElementById(prefix + '-rows').value;
+            const padding = document.getElementById(prefix + '-padding').value;
+            const gap = document.getElementById(prefix + '-gap').value;
+            const container = document.getElementById(prefix + '-container').value;
+            const outer = document.getElementById(prefix + '-outer').value;
+            const inner = document.getElementById(prefix + '-inner').value;
+            const wheel = document.getElementById(prefix + '-wheel').value;
+            const card = document.getElementById(prefix + '-card').value;
+            const hand = document.getElementById(prefix + '-hand').value;
+            const played = document.getElementById(prefix + '-played').value;
+            const font = document.getElementById(prefix + '-font').value;
+            
+            const [cardW, cardH] = card.split(' x ');
+            const [handW, handH] = hand.split(' x ');
+            const [playedW, playedH] = played.split(' x ');
+            
+            const css = `
+/* ${width} x ${height} */
+@media screen and (width: ${width}) and (height: ${height}) {
+  .game-area {
+    grid-template-columns: ${columns};
+    grid-template-rows: ${rows};
+    padding: ${padding};
+    gap: ${gap};
+  }
+  
+  .container { width: ${container}; height: ${container}; }
+  .outer-ring { width: ${outer}; height: ${outer}; }
+  .ring-wheel { width: ${inner}; height: ${inner}; }
+  .wheel { width: ${wheel}; height: ${wheel}; }
+  
+  .card { width: ${cardW}; height: ${cardH}; font-size: ${font}; }
+  .player-hand .card { width: ${handW}; height: ${handH}; }
+  .played-cards-container .card { width: ${playedW}; height: ${playedH}; }
+}
+            `;
+            
+            document.getElementById('css-output').textContent = css.trim();
+            document.getElementById('output').style.display = 'block';
+        }
+        
+        function copyToClipboard() {
+            const text = document.getElementById('css-output').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('CSS copiado al portapapeles!');
+            });
+        }
+    </script>
+</body>
+</html>

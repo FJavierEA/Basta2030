@@ -1,0 +1,526 @@
+/* ===== CSS ESPECÍFICO PARA MOBILE QUAD HD 1440x2560 ===== */
+/* Carga automática via responsive-manager.js */
+
+/* RESOLUCIÓN MÓVIL QUAD HD - CON SCROLL VERTICAL */
+.game-area {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto auto auto auto;
+  grid-template-areas:
+    "main"
+    "controls"
+    "deck"
+    "discard" 
+    "played"
+    "player";
+  padding: 20px;
+  gap: 25px;
+  height: auto;
+  min-height: 100vh;
+}
+
+/* RULETA - Tamaño grande para móvil Quad HD */
+.container { 
+  width: 520px; 
+  height: 520px; 
+  grid-area: main;
+  justify-self: center;
+}
+.outer-ring { width: 510px; height: 510px; }
+.sections-wheel { width: 130px; height: 130px; }
+.ring-wheel { width: 200px; height: 200px; }
+.wheel { width: 70px; height: 70px; }
+
+/* CARTAS - Tamaño móvil Quad HD grandes */
+.card { 
+  width: 160px; 
+  height: 220px; 
+  font-size: 12px; 
+}
+.player-hand .card { width: 170px; height: 230px; }
+.played-cards-container .card { width: 150px; height: 205px; }
+
+/* MENSAJES - Posición móvil Quad HD */
+#turnMessage { 
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 16px; 
+  padding: 12px 24px; 
+  border-radius: 12px;
+  z-index: 1000;
+  max-width: 90%;
+  text-align: center;
+}
+
+#message { 
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px; 
+  padding: 10px 20px; 
+  z-index: 1000;
+  max-width: 90%;
+  text-align: center;
+}
+
+/* PANELES - Expandidos para móvil Quad HD */
+.players-list-panel { 
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 300px; 
+  font-size: 14px;
+  padding: 15px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.info-panel-left { 
+  position: fixed !important;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  font-size: 16px;
+  background: transparent;
+  padding: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  grid-area: none !important;
+}
+
+/* Botón toggle móvil Quad HD */
+.panel-toggle-btn {
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, #6802bb, #ca04ca);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  order: -1;
+  position: relative;
+}
+
+.panel-toggle-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.6);
+}
+
+/* Mensaje de ayuda móvil Quad HD */
+.panel-toggle-btn::before {
+  content: '👆 Menú';
+  position: absolute;
+  right: 55px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  animation: pulseHelp 2s infinite ease-in-out;
+  z-index: 1002;
+}
+
+@keyframes pulseHelp {
+  0%, 100% {
+    opacity: 0.8;
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.05);
+  }
+}
+
+.info-panel-left.expanded .panel-toggle-btn::before {
+  display: none;
+}
+
+/* Botones del panel móvil Quad HD */
+.info-panel-left .info-btn,
+.info-panel-left .music-toggle {
+  opacity: 0;
+  transform: translateY(-20px) scale(0.8);
+  visibility: hidden;
+  transition: all 0.3s ease;
+  transition-delay: 0s;
+  margin-top: -5px;
+}
+
+.info-panel-left.expanded .info-btn:nth-child(1) {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+  transition-delay: 0.1s;
+  margin-top: 0;
+}
+
+.info-panel-left.expanded .info-btn:nth-child(2) {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+  transition-delay: 0.2s;
+  margin-top: 0;
+}
+
+.info-panel-left.expanded .info-btn:nth-child(3) {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+  transition-delay: 0.3s;
+  margin-top: 0;
+}
+
+.info-panel-left.expanded .info-btn:nth-child(4) {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+  transition-delay: 0.4s;
+  margin-top: 0;
+}
+
+.info-panel-left.expanded .info-btn:nth-child(5) {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+  transition-delay: 0.5s;
+  margin-top: 0;
+}
+
+.info-panel-left.expanded .music-toggle {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+  transition-delay: 0.6s;
+  margin-top: 0;
+}
+
+.info-btn {
+  position: relative;
+  cursor: pointer;
+  padding: 0;
+  background: linear-gradient(135deg, #6802bb, #ca04ca);
+  border: none;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  width: 45px !important;
+  height: 45px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.info-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.6);
+}
+
+.info-panel-left .music-toggle {
+  width: 45px !important;
+  height: 45px !important;
+  border-radius: 10px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+/* MAZO Y DESCARTADAS - Layout móvil Quad HD */
+.deck-container { 
+  grid-area: deck;
+  padding: 15px;
+  text-align: center;
+}
+.deck-container h3 { 
+  font-size: 16px; 
+  margin-bottom: 12px; 
+}
+.card-pile-container { 
+  grid-area: discard;
+  padding: 15px;
+  text-align: center;
+}
+.card-pile-container h3 { 
+  font-size: 16px; 
+  margin-bottom: 12px; 
+}
+.card-deck, .card-pile {
+  width: 110px;
+  height: 150px;
+  margin: 0 auto;
+}
+.deck-count, .pile-count {
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+.draw-button {
+  margin-top: 12px;
+  width: 85%;
+  padding: 12px;
+  background: linear-gradient(145deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+/* LETRAS ANILLO INTERNO - Móvil Quad HD */
+.ring-label { 
+  width: 32px; 
+  margin-left: -16px; 
+  font-size: 20px; 
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+}
+
+/* IMÁGENES ANILLO EXTERNO - Escala grande */
+.outer-labels {
+  transform: scale(0.9);
+}
+
+/* CONTROLES - Layout móvil Quad HD horizontal */
+.controls {
+  grid-area: controls;
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  gap: 20px !important;
+  padding: 20px !important;
+  background: transparent !important;
+  z-index: 999;
+}
+
+#skipTurnBtn { order: 1; }
+#bellButton { order: 2; }
+#rollDiceBtn { order: 3; }
+
+.controls #diceImg {
+  display: none;
+}
+
+.controls button {
+  width: 150px !important;
+  height: 60px !important;
+  padding: 0 !important;
+  font-size: 15px !important;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
+}
+
+.controls button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.controls button:disabled {
+  opacity: 0.5;
+  background: #666;
+  cursor: not-allowed;
+}
+
+.bell-button {
+  background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+  font-weight: bold !important;
+}
+
+/* CARTAS JUGADAS - Layout móvil Quad HD */
+.played-cards-container {
+  grid-area: played;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 12px;
+}
+
+.played-area h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* MANO DEL JUGADOR - Layout móvil Quad HD */
+.player-hand {
+  grid-area: player;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  padding: 25px;
+  max-height: none;
+  overflow: visible;
+  background: rgba(0,0,0,0.2);
+  border-radius: 12px;
+  margin-bottom: 40px;
+}
+
+/* MODO APILADO MÓVIL QUAD HD */
+.player-hand.stacked .card {
+  width: 140px !important;
+  height: 190px !important;
+  margin-left: -60px;
+}
+
+.player-hand.stacked .card:first-child {
+  margin-left: 0;
+}
+
+.player-hand.stacked .card:hover {
+  transform: translateY(-15px) scale(1.05) rotate(0deg) !important;
+  margin-left: -60px;
+  margin-right: 25px;
+}
+
+.player-hand.stacked::after {
+  font-size: 13px;
+  padding: 5px 10px;
+  top: 10px;
+  right: 10px;
+}
+
+/* SCROLL MÓVIL HABILITADO */
+html, body {
+  overflow: auto !important;
+  height: auto !important;
+}
+
+.game-area {
+  height: auto !important;
+  min-height: 100vh !important;
+}
+
+/* LOBBY MÓVIL QUAD HD */
+.lobby-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  transition: opacity 0.3s ease;
+  padding: 40px;
+}
+
+.lobby-card {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  padding: 40px;
+  border-radius: 25px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  max-width: 500px;
+  width: 95%;
+  text-align: center;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.lobby-card h1 {
+  font-size: 36px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #4ade80, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.lobby-card > p {
+  font-size: 16px;
+  color: #9ca3af;
+  margin-bottom: 30px;
+}
+
+.lobby-register {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.lobby-register input {
+  padding: 16px;
+  font-size: 18px;
+  border: 2px solid #4ade80;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.lobby-register button {
+  padding: 16px;
+  font-size: 18px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #4ade80, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.lobby-chat-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 25px 0;
+}
+
+.chat-btn {
+  padding: 15px;
+  font-size: 16px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #4ade80, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Indicador de scroll para móvil Quad HD */
+.scroll-indicator {
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 15px;
+  z-index: 9999;
+  animation: pulse 2s infinite;
+  pointer-events: none;
+}

@@ -1,0 +1,110 @@
+[
+  {
+    "seccion": "Pobreza y desigualdad social",
+    "tarjetas": [
+      { "texto": "Apoyo económico\nInclusión económica\nDerechos humanos "},
+      { "texto": "Inclusión social\nEmpleo digno\nPolíticas equitativas\nTransparencia "},
+      { "texto": "Protección social\nEmprendimiento\nCooperación internacional "},
+      { "texto": "Acceso justo\nParticipación ciudadana\nFinanciamiento sostenible "},
+      { "texto": "Empleo digno\nGobernanza\nInclusión económica "},
+      { "texto": "Apoyo económico\nFormación profesional\nCooperación internacional "},
+      { "texto": "Inclusión social\nPolíticas equitativas\nParticipación política "},
+      { "texto": "Protección social\nSostenibilidad económica\nAcceso justo "},
+      { "texto": "Apoyo económico\nCapacitación docente\nInclusión económica\nParticipación política "}
+    ]
+  },
+  {
+    "seccion": "Hambre y falta de acceso a alimentos",
+    "tarjetas": [
+      { "texto": "Agricultura sostenible\nSeguridad alimentaria\nNutrición infantil "},
+      { "texto": "Innovación agrícola\nBienestar mental\nAcceso seguro "},
+      { "texto": "Prevención\nInfraestructura\nReducción de desechos "},
+      { "texto": "Agricultura sostenible\nReciclaje\nAtención médica\nGestión hídrica "},
+      { "texto": "Seguridad alimentaria\nEducación ambiental\nNutrición infantil "},
+      { "texto": "Innovación agrícola\nReducción de desechos\nAcceso seguro "},
+      { "texto": "Bienestar mental\nReducción de emisiones\nNutrición infantil "},
+      { "texto": "Atención médica\nGestión hídrica\nReciclaje "}
+    ]
+  },
+  {
+    "seccion": "Salud y bienestar insuficientes",
+    "tarjetas": [
+      { "texto": "Atención médica\nVacunas\nBienestar mental\nEducación ambiental "},
+      { "texto": "Prevención\nGestión hídrica\nAdaptación climática "},
+      { "texto": "Acceso seguro\nReducción de emisiones\nResiliencia ambiental "},
+      { "texto": "Bienestar mental\nEducación ambiental\nTransporte limpio "},
+      { "texto": "Atención médica\nInfraestructura sostenible\nEnergías limpias "},
+      { "texto": "Prevención\nReforestación\nSostenibilidad ambiental "},
+      { "texto": "Vacunas\nEducación ambiental\nParticipación ciudadana "},
+      { "texto": "Bienestar mental\nResiliencia ambiental\nReducción de emisiones "},
+      { "texto": "Atención médica\nAcceso seguro\nPrevención " }
+    ]
+  },
+  {
+    "seccion": "Educación desigual o limitada",
+    "tarjetas": [
+      { "texto": "Acceso universal\nCapacitación docente\nEducación inclusiva\nCooperación internacional "},
+      { "texto": "Igualdad educativa\nEmpoderamiento femenino\nFormación profesional "},
+      { "texto": "Educación igualitaria\nParticipación política\nPolíticas equitativas "},
+      { "texto": "Acceso universal\nInnovación global\nIgualdad educativa "},
+      { "texto": "Capacitación docente\nEducación inclusiva\nIntercambio científico "},
+      { "texto": "Empoderamiento femenino\nAcceso equitativo\nParticipación ciudadana "},
+      { "texto": "Educación igualitaria\nCooperación internacional\nEducación inclusiva "},
+      { "texto": "Igualdad educativa\nInnovación global\nPolíticas equitativas\nGobernanza "}
+    ]
+  },
+  {
+    "seccion": "Desigualdad de género y discriminación",
+    "tarjetas": [
+      { "texto": "Empoderamiento femenino\nDerechos laborales\nParticipación política "},
+      { "texto": "Educación igualitaria\nInclusión económica\nEmpleo digno "},
+      { "texto": "Derechos laborales\nTransparencia\nCooperación internacional "},
+      { "texto": "Empoderamiento femenino\nInclusión social\nPolíticas equitativas "},
+      { "texto": "Participación política\nFormación profesional\nAcceso justo "},
+      { "texto": "Igualdad educativa\nGobernanza\nParticipación ciudadana "},
+      { "texto": "Empoderamiento femenino\nEmprendimiento\nTransparencia\nPolíticas equitativas "},
+      { "texto": "Educación igualitaria\nInclusión económica\nDerechos humanos "}
+    ]
+  },
+  {
+    "seccion": "Degradación ambiental y cambio climático",
+    "tarjetas": [
+      { "texto": "Gestión hídrica\nEnergías renovables\nReforestación "},
+      { "texto": "Sostenibilidad ambiental\nTransporte limpio\nReducción de emisiones "},
+      { "texto": "Innovación tecnológica\nConservación natural\nReducción de plásticos "},
+      { "texto": "Infraestructura sostenible\nAdaptación climática\nProtección oceánica "},
+      { "texto": "Eficiencia energética\nReciclaje\nBiodiversidad "},
+      { "texto": "Energías limpias\nRestauración ambiental\nConservación marina "},
+      { "texto": "Educación ambiental\nDesarrollo industrial\nEconomía circular "},
+      { "texto": "Resiliencia ambiental\nReducción de emisiones\nBiodiversidad "},
+      { "texto": "Conservación natural\nProtección oceánica\nAdaptación climática\nEnergías renovables "}
+    ]
+  },
+  {
+    "seccion": "Consumo y producción no sostenibles",
+    "tarjetas": [
+      { "texto": "Reciclaje\nReducción de desechos\nEconomía circular "},
+      { "texto": "Responsabilidad empresarial\nInnovación tecnológica\nEficiencia energética "},
+      { "texto": "Energía asequible\nSostenibilidad económica\nEducación ambiental "},
+      { "texto": "Reducción de desechos\nInnovación tecnológica\nEnergías renovables\nEconomía circular "},
+      { "texto": "Responsabilidad empresarial\nEficiencia energética\nEducación ambiental "},
+      { "texto": "Reciclaje\nEnergías limpias\nInnovación global "},
+      { "texto": "Economía circular\nInnovación tecnológica\nAdaptación climática "},
+      { "texto": "Reducción de desechos\nSostenibilidad ambiental\nEnergías renovables "},
+      { "texto": "Reciclaje\nInnovación tecnológica\nReciclaje "}
+    ]
+  },
+  {
+    "seccion": "Falta de paz, justicia e instituciones sólidas",
+    "tarjetas": [
+      { "texto": "Derechos humanos\nTransparencia\nGobernanza\nCooperación internacional "},
+      { "texto": "Participación ciudadana\nFinanciamiento sostenible\nIntercambio científico "},
+      { "texto": "Gobernanza\nPolíticas equitativas\nCooperación internacional "},
+      { "texto": "Transparencia\nEducación ambiental\nInnovación global "},
+      { "texto": "Derechos humanos\nParticipación ciudadana\nCooperación internacional "},
+      { "texto": "Gobernanza\nIntercambio científico\nFinanciamiento sostenible "},
+      { "texto": "Transparencia\nParticipación política\nInnovación global "},
+      { "texto": "Derechos humanos\nCooperación internacional\nGobernanza "}
+    ]
+  }
+]
